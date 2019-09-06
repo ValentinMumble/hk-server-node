@@ -1,0 +1,27 @@
+{
+  "name": "hk-server",
+  "description": "HK Server",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ValentinMumble/www/tree/master/hk/server"
+  },
+  "version": "0.1.0",
+  "main": "index.js",
+  "author": "Valentin Dijkstra",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^8.0.0",
+    "esm": "^3.2.25",
+    "express": "^4.16.1",
+    "node-hue-api": "^2.4.6",
+    "socket.io": "^2.2.0",
+    "spotify-connect-ws": "^0.1.1",
+    "spotify-web-api-node": "^4.0.0"
+  },
+  "scripts": {
+    "start": "node ./index.js",
+    "deploy": "rsync -avz -e 'ssh' ./ pi@vmumble.ddns.net:/home/pi/hk ; ssh pi@vmumble.ddns.net 'cd /home/pi/hk ; killall node ; forever stop index.js ; forever start index.js'"
+  }
+}
