@@ -3,7 +3,7 @@
   "description": "HK Server",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ValentinMumble/www/tree/master/hk/server"
+    "url": "git@github.com:ValentinMumble/hk-server-node.git"
   },
   "version": "0.1.0",
   "main": "index.js",
