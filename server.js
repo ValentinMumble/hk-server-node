@@ -114,7 +114,11 @@ app.get('/hue/off', (req, res) => {
 })
 
 app.get('/bluetooth/reset', (req, res) => {
-  exec(process.env.RESET_BLUETOOTH_CMD, (err, stdout, stderr) => res.send({ uri: req.originalUrl, stdout }))
+  exec(process.env.SHELL_BLUETOOTH_RESET, (err, stdout, stderr) => res.send({ uri: req.originalUrl, stdout }))
+})
+
+app.get('/bluetooth/discover', (req, res) => {
+  exec(process.env.SHELL_BLUETOOTH_DISCOVER, (err, stdout, stderr) => res.send({ uri: req.originalUrl, stdout }))
 })
 
 export default server
