@@ -24,6 +24,6 @@
   "scripts": {
     "start": "node ./index.js",
     "upload": "rsync -avz -e 'ssh' ./ pi@vmumble.ddns.net:$npm_package_deployPath",
-    "deploy": "rsync -avz -e 'ssh' ./ pi@vmumble.ddns.net:$npm_package_deployPath && ssh pi@vmumble.ddns.net \"cd $npm_package_deployPath && forever stop $npm_package_name ; forever start -a --uid $npm_package_name index.js\""
+    "deploy": "npm run-script upload && ssh pi@vmumble.ddns.net \"cd $npm_package_deployPath && forever stop $npm_package_name ; forever start -a --uid $npm_package_name index.js\""
   }
 }
