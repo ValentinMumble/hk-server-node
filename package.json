@@ -17,11 +17,12 @@
     "express": "^4.16.1",
     "node-hue-api": "^2.4.6",
     "socket.io": "^2.2.0",
-    "spotify-connect-ws": "^0.1.1",
+    "spotify-connect-ws": "https://github.com/ValentinMumble/spotify-connect-ws.git",
     "spotify-web-api-node": "^4.0.0"
   },
   "deployPath": "/home/pi/hk/hk-server-node",
   "scripts": {
+    "postinstall": "cd ./node_modules/spotify-connect-ws && yarn install && yarn build",
     "start": "node ./index.js",
     "start-forever": "forever start -a --uid $npm_package_name index.js",
     "stop-forever": "forever stop $npm_package_name",
