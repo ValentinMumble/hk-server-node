@@ -20,13 +20,12 @@
     "spotify-connect-ws": "https://github.com/ValentinMumble/spotify-connect-ws.git",
     "spotify-web-api-node": "^4.0.0"
   },
-  "deployPath": "/home/pi/hk/hk-server-node",
   "scripts": {
     "postinstall": "cd ./node_modules/spotify-connect-ws && yarn install && yarn build",
     "start": "node ./index.js",
     "start-forever": "forever start -a --uid $npm_package_name index.js",
     "stop-forever": "forever stop $npm_package_name",
-    "upload": "rsync -avz -e 'ssh' ./ pi@vmumble.ddns.net:$npm_package_deployPath",
-    "deploy": "npm run-script upload && ssh pi@vmumble.ddns.net \"cd $npm_package_deployPath && npm run-script stop-forever ; npm run-script start-forever\""
+    "upload": "export $(cat .env | grep PKG | xargs) && rsync -avz -e 'ssh' ./ $PKG_DEPLOY_HOST:$PKG_DEPLOY_PATH",
+    "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH && yarn stop-forever ; yarn start-forever\""
   }
 }
