@@ -100,7 +100,7 @@ app.get('/spotify/access-token', (req, res) => {
     }
   } else {
     // Unauthorized
-    spotifyApi.setRedirectURI(req.headers.referer + 'callback/');
+    spotifyApi.setRedirectURI(`${req.headers.referer.replace(/\/?$/, '/')}callback/`);
     res.send({ url: spotifyApi.createAuthorizeURL(process.env.SPO_SCOPE.split(' '), 'state') });
   }
 });
