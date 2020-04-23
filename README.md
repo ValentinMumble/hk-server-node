@@ -1,14 +1,13 @@
-# HK Node server
+# 🎧 HK Node server
 
 > Node version of HK server
 
 ## Install
 
 ```bash
-$ npm install
+$ cp .env.dist .env
+$ yarn install
 ```
-
-Create the .env file using provided .env.dist
 
 ## Run
 
@@ -19,5 +18,5 @@ $ node index.js
 or with forever
 
 ```bash
-$ forever start index.js
+$ forever start -a --uid hk-server-node index.js
 ```
