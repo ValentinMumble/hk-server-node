@@ -17,11 +17,7 @@ let lights = [];
  * @param {Express.Response} res
  */
 const turnOn = (req, res) => {
-  const state = lightState
-    .create()
-    .turnOn()
-    .brightness(100)
-    .rgb(hex2RGB(req.params.color));
+  const state = lightState.create().turnOn().brightness(100).rgb(hex2RGB(req.params.color));
 
   lights.forEach(light => bob.setLightState(light.id, state));
 

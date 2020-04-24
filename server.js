@@ -10,6 +10,7 @@ import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff} from './hue';
 import {discoverBluetooth, resetBluetooth} from './shell';
 import {addTrackToOK, getAccessToken, getDevices, authorize, refreshToken} from './spotify';
+import {initResponse} from './utils';
 
 const {ALLOWED_ORIGINS, APP_ENV, HTTPS_CERT_FILE, HTTPS_KEY_FILE, PORT} = process.env;
 
@@ -48,7 +49,9 @@ const io = socketio(server);
 io.of('connect').on('connection', connectSocket);
 
 app.get('/soca/count', (req, res) => {
-  res.send({uri: req.originalUrl, clientsCount: io.engine.clientsCount});
+  const response = initResponse(req.originalUrl);
+  response.results.push(io.engine.clientsCount);
+  res.send(response);
 });
 
 app.get('/spotify/addok/:uri', addTrackToOK);
