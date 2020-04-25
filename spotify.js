@@ -64,7 +64,7 @@ const getAccessToken = (req, res) => {
   const accessToken = spotify.getAccessToken();
   if (accessToken) {
     if (Date.now() < expiresAt) {
-      response.results.push({accessToken});
+      response.results.push(accessToken);
     } else {
       // Token expired
       return refreshToken(req, res);
@@ -72,9 +72,9 @@ const getAccessToken = (req, res) => {
   } else {
     // Unauthorized
     spotify.setRedirectURI(`${req.headers.referer.replace(/\/?$/, '/')}callback/`);
-    response.results.push({
-      url: spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state'),
-    });
+    response.status = 401;
+    response.results.push(spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state'),
+    );
   }
 
   res.send(response);
