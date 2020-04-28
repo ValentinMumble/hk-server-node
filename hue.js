@@ -41,4 +41,18 @@ const turnOff = async (req, res) => {
   res.send({uri: req.originalUrl, result});
 };
 
-export {turnOn, turnOff};
+/**
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+const setBrightness = async (req, res) => {
+  const {
+    _values: {bri},
+  } = lightState.create().brightness(Number(req.params.value));
+
+  lights.forEach(light => bob.setLightState(light.id, {bri}));
+
+  res.send({uri: req.originalUrl});
+};
+
+export {turnOn, turnOff, setBrightness};
