@@ -35,7 +35,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       origin && -1 === allowedOrigins.indexOf(origin)
-        ? callback(new Error('Unallowed CORS'), false)
+        ? callback(new Error(`Unallowed CORS: ${origin}`), false)
         : callback(null, true);
     },
   })
