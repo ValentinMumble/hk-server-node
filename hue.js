@@ -29,9 +29,30 @@ const turnOn = (req, res) => {
  * @param {Express.Response} res
  */
 const turnOff = async (req, res) => {
-  const result = await bob.setGroupLightState(0, lightState.create().turnOff());
+  const offState = lightState.create().turnOff();
+  let result;
+
+  if (req.params.id) {
+    result = await bob.setLightState(req.params.id, offState);
+  } else {
+    result = await bob.setGroupLightState(0, offState);
+  }
 
   res.send({uri: req.originalUrl, result});
 };
 
-export {turnOn, turnOff};
+/**
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+const setBrightness = async (req, res) => {
+  const {
+    _values: {bri},
+  } = lightState.create().brightness(Number(req.params.value));
+
+  lights.forEach(light => bob.setLightState(light.id, {bri}));
+
+  res.send({uri: req.originalUrl});
+};
+
+export {turnOn, turnOff, setBrightness};

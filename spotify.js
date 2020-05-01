@@ -10,7 +10,7 @@ const spotify = new SpotifyWebApi({
 });
 let expiresAt = 0;
 
-const storeToken = (expiration, accessToken, refreshToken = spotify.getRefreshToken()) => {
+const storeToken = (expiration, accessToken, refreshToken) => {
   spotify.setAccessToken(accessToken);
   spotify.setRefreshToken(refreshToken);
   expiresAt = Date.now() + expiration * 1000;
@@ -25,7 +25,7 @@ const refreshToken = async (req, res) => {
 
   try {
     const {body} = await spotify.refreshAccessToken();
-    storeToken(body.expires_in, body.access_token);
+    storeToken(body.expires_in, body.access_token, spotify.getRefreshToken());
     response.results.push(body.access_token);
   } catch (error) {
     response.status = 500;
@@ -71,7 +71,7 @@ const getAccessToken = (req, res) => {
     }
   } else {
     // Unauthorized
-    spotify.setRedirectURI(`${req.headers.referer.replace(/\/?$/, '/')}callback/`);
+    spotify.setRedirectURI(`${req.headers.referer.replace(/\/?$/, '/')}callback`);
     response.status = 401;
     response.results.push(spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state'),
     );
