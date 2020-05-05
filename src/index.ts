@@ -6,13 +6,14 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import socketio from 'socket.io';
+//@ts-ignore //TODO
 import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff, setBrightness} from './hue';
 import {discoverBluetooth, resetBluetooth} from './shell';
 import {addTrackToOK, getAccessToken, getDevices, getPlaylists, authorize, refreshToken} from './spotify';
 import {initResponse} from './utils';
 
-const {ALLOWED_ORIGINS, APP_ENV, HTTPS_CERT_FILE, HTTPS_KEY_FILE, PORT} = process.env;
+const {ALLOWED_ORIGINS = '[]', APP_ENV, HTTPS_CERT_FILE = '', HTTPS_KEY_FILE = '', PORT} = process.env;
 
 const isProd = 'prod' === APP_ENV;
 const app = express();
@@ -50,6 +51,7 @@ io.of('connect').on('connection', connectSocket);
 
 app.get('/soca/count', (req, res) => {
   const response = initResponse(req.originalUrl);
+  //@ts-ignore //TODO
   response.results.push(io.engine.clientsCount);
   res.send(response);
 });
@@ -67,5 +69,3 @@ app.get('/hue/brightness/:value', setBrightness);
 
 app.get('/bluetooth/reset', resetBluetooth);
 app.get('/bluetooth/discover', discoverBluetooth);
-
-export default server;

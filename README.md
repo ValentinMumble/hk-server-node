@@ -12,11 +12,12 @@ $ yarn install
 ## Run
 
 ```bash
-$ node index.js
+$ yarn build
+$ node build/index.js
 ```
 
 or with forever
 
 ```bash
-$ forever start -a --uid hk-server-node index.js
+$ forever start -a --uid hk-server-node build/index.js
 ```
