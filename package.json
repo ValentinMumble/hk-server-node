@@ -25,7 +25,7 @@
     "build": "yarn tsc",
     "start-forever": "forever start -a --uid $npm_package_name build/index.js",
     "stop-forever": "forever stop $npm_package_name",
-    "upload": "export $(cat .env | grep PKG | xargs) && yarn build && rsync --copy-links -avz -e 'ssh' ./build $PKG_DEPLOY_HOST:$PKG_DEPLOY_PATH",
+    "upload": "export $(cat .env | grep PKG | xargs) && yarn build && rsync --copy-links -avz -e 'ssh' ./build .env $PKG_DEPLOY_HOST:$PKG_DEPLOY_PATH",
     "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH && yarn stop-forever ; yarn start-forever\""
   },
   "devDependencies": {
@@ -33,6 +33,7 @@
     "@types/express": "^4.17.6",
     "@types/node": "^13.13.4",
     "@types/node-hue-api": "^2.3.0",
-    "@types/socket.io": "^2.1.4"
+    "@types/socket.io": "^2.1.4",
+    "@types/spotify-web-api-node": "^4.0.1"
   }
 }

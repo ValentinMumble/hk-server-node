@@ -84,6 +84,18 @@
   dependencies:
     "@types/node" "*"
 
+"@types/spotify-api@*":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@types/spotify-api/-/spotify-api-0.0.3.tgz#b683476ad29d01cfce95bd3506c2c3aaa5c46b66"
+  integrity sha512-NV8GATMh2LmCqkODeuNQMYppOluthRdaJVfgLUrDX81azPGBRfE2Q75gwhaMJKbLN7U5c5/dMVPEMtG34+Mupg==
+
+"@types/spotify-web-api-node@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@types/spotify-web-api-node/-/spotify-web-api-node-4.0.1.tgz#0a2b85a1d40ae312de37deeb3c7e85bf7f4e6812"
+  integrity sha512-uxoz7DcSj/v2URDo54FjzctIfdQdEFvmUreHrR26G/Vf0Qm5S0lbt7LdKJeW2EoWUzzfjetYV3TcfMxRm1bWIw==
+  dependencies:
+    "@types/spotify-api" "*"
+
 accepts@~1.3.4, accepts@~1.3.7:
   version "1.3.7"
   resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.7.tgz#531bc726517a3b2b41f850021c6cc15eaab507cd"
