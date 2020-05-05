@@ -9,7 +9,7 @@ import socketio from 'socket.io';
 import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff, setBrightness} from './hue';
 import {discoverBluetooth, resetBluetooth} from './shell';
-import {addTrackToOK, getAccessToken, getDevices, authorize, refreshToken} from './spotify';
+import {addTrackToOK, getAccessToken, getDevices, getPlaylists, authorize, refreshToken} from './spotify';
 import {initResponse} from './utils';
 
 const {ALLOWED_ORIGINS, APP_ENV, HTTPS_CERT_FILE, HTTPS_KEY_FILE, PORT} = process.env;
@@ -58,6 +58,7 @@ app.get('/spotify/addok/:uri', addTrackToOK);
 app.get('/spotify/access-token', getAccessToken);
 app.get('/spotify/authorize/:code', authorize);
 app.get('/spotify/devices', getDevices);
+app.get('/spotify/playlists', getPlaylists);
 app.get('/spotify/refresh-token', refreshToken);
 
 app.get('/hue/on/:color', turnOn);

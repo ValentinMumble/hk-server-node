@@ -73,8 +73,7 @@ const getAccessToken = (req, res) => {
     // Unauthorized
     spotify.setRedirectURI(`${req.headers.referer.replace(/\/?$/, '/')}callback`);
     response.status = 401;
-    response.results.push(spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state'),
-    );
+    response.results.push(spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state'));
   }
 
   res.send(response);
@@ -117,4 +116,22 @@ const getDevices = async (req, res) => {
   res.send(response);
 };
 
-export {addTrackToOK, authorize, getAccessToken, getDevices, refreshToken};
+/**
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+const getPlaylists = async (req, res) => {
+  const response = initResponse(req.originalUrl);
+
+  try {
+    const {body} = await spotify.getUserPlaylists();
+    response.results = body.items;
+  } catch (error) {
+    response.status = 500;
+    response.errors.push({name: error.name, message: error.message});
+  }
+
+  res.send(response);
+};
+
+export {addTrackToOK, authorize, getAccessToken, getDevices, getPlaylists, refreshToken};
