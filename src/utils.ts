@@ -27,4 +27,9 @@ const initResponse = <T>(uri: string): APIResponse<T> => ({
   results: [],
 });
 
-export {hex2RGB, initResponse};
+const addError = <T>(response: APIResponse<T>, error: Error) => {
+  response.status = 500;
+  response.errors.push({name: error.name, message: error.message});
+};
+
+export {hex2RGB, initResponse, addError};

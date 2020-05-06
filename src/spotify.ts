@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import {Request, Response} from 'express';
 import SpotifyWebApi from 'spotify-web-api-node';
-import {initResponse} from './utils';
+import {initResponse, addError} from './utils';
 
 const {SPO_CLIENT_ID, SPO_CLIENT_SECRET, SPO_OK_ID = '', SPO_SCOPE = ''} = process.env;
 
@@ -25,8 +25,7 @@ const refreshToken = async (req: Request, res: Response) => {
     storeToken(body.expires_in, body.access_token);
     response.results.push(body.access_token);
   } catch (error) {
-    response.status = 500;
-    response.errors.push({name: error.name, message: error.message});
+    addError(response, error);
   }
 
   res.send(response);
@@ -40,8 +39,7 @@ const authorize = async (req: Request<{code: string}>, res: Response) => {
     storeToken(body.expires_in, body.access_token, body.refresh_token);
     response.results.push(body.access_token);
   } catch (error) {
-    response.status = 500;
-    response.errors.push({name: error.name, message: error.message});
+    addError(response, error);
   }
 
   res.send(response);
@@ -60,7 +58,8 @@ const getAccessToken = (req: Request, res: Response) => {
     }
   } else {
     // Unauthorized
-    spotify.setRedirectURI(`${req.headers?.referer?.replace(/\/?$/, '/')}callback`);
+    //TODO improve?
+    spotify.setRedirectURI(`${req.headers.referer?.replace(/\/?$/, '/')}callback`);
     response.status = 401;
     response.results.push(spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state'));
   }
@@ -76,8 +75,7 @@ const addTrackToOK = async (req: Request, res: Response) => {
     await spotify.addTracksToPlaylist(SPO_OK_ID, [req.params.uri]);
     response.status = 204;
   } catch (error) {
-    response.status = 500;
-    response.errors.push({name: error.name, message: error.message});
+    addError(response, error);
   }
 
   res.send(response);
@@ -90,8 +88,7 @@ const getDevices = async (req: Request, res: Response) => {
     const {body} = await spotify.getMyDevices();
     response.results = body.devices;
   } catch (error) {
-    response.status = 500;
-    response.errors.push({name: error.name, message: error.message});
+    addError(response, error);
   }
 
   res.send(response);
@@ -104,8 +101,7 @@ const getPlaylists = async (req: Request, res: Response) => {
     const {body} = await spotify.getUserPlaylists();
     response.results = body.items;
   } catch (error) {
-    response.status = 500;
-    response.errors.push({name: error.name, message: error.message});
+    addError(response, error);
   }
 
   res.send(response);
