@@ -6,7 +6,6 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import socketio from 'socket.io';
-//@ts-ignore //TODO
 import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff, setBrightness} from './hue';
 import {discoverBluetooth, resetBluetooth} from './shell';
@@ -51,8 +50,7 @@ io.of('connect').on('connection', connectSocket);
 
 app.get('/soca/count', (req, res) => {
   const response = initResponse(req.originalUrl);
-  //@ts-ignore //TODO
-  response.results.push(io.engine.clientsCount);
+  response.results.push(Object.keys(io.sockets.sockets).length);
   res.send(response);
 });
 

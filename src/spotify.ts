@@ -58,8 +58,7 @@ const getAccessToken = (req: Request, res: Response) => {
     }
   } else {
     // Unauthorized
-    //TODO improve?
-    spotify.setRedirectURI(`${req.headers.referer?.replace(/\/?$/, '/')}callback`);
+    spotify.setRedirectURI(`${req.get('origin')}/callback`);
     response.status = 401;
     response.results.push(spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state'));
   }

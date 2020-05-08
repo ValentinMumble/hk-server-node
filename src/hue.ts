@@ -36,12 +36,9 @@ const turnOff = async (req: Request<{id: string}>, res: Response) => {
 };
 
 const setBrightness = async (req: Request<{value: string}>, res: Response) => {
-  const {
-    //@ts-ignore //TODO
-    _values: {bri},
-  } = lightState.create().brightness(Number(req.params.value));
-
-  lights.forEach(light => light.id && bob.setLightState(light.id, {bri}));
+  lights.forEach(
+    light => light.id && bob.setLightState(light.id, {bri: Math.round((Number(req.params.value) * 254) / 100)})
+  );
 
   res.send({uri: req.originalUrl});
 };
