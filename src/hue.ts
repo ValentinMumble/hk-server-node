@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import {Request, Response} from 'express';
 import {HueApi, lightState, ILight} from 'node-hue-api';
-import {hex2RGB} from './utils';
+import {initResponse, hex2RGB} from './utils';
 
 const {ROBERT_HUE_IP = '', ROBERT_HUE_USERNAME = ''} = process.env;
 
@@ -14,33 +14,34 @@ let lights: ILight[] = [];
 })();
 
 const turnOn = (req: Request<{color: string}>, res: Response) => {
+  const response = initResponse(req.originalUrl);
   const [r, g, b] = hex2RGB(req.params.color);
   const state = lightState.create().turnOn().brightness(100).rgb(r, g, b);
 
   lights.forEach(light => light.id && bob.setLightState(light.id, state));
 
-  res.send({uri: req.originalUrl});
+  res.send(response);
 };
 
 const turnOff = async (req: Request<{id: string}>, res: Response) => {
+  const response = initResponse(req.originalUrl);
   const offState = lightState.create().turnOff();
-  let result;
 
   if (req.params.id) {
-    result = await bob.setLightState(req.params.id, offState);
+    await bob.setLightState(req.params.id, offState);
   } else {
-    result = await bob.setGroupLightState(0, offState);
+    await bob.setGroupLightState(0, offState);
   }
 
-  res.send({uri: req.originalUrl, result});
+  res.send(response);
 };
 
-const setBrightness = async (req: Request<{value: string}>, res: Response) => {
-  lights.forEach(
-    light => light.id && bob.setLightState(light.id, {bri: Math.round((Number(req.params.value) * 254) / 100)})
-  );
+const setBrightness = async (req: Request<{ratio: string}>, res: Response) => {
+  const response = initResponse(req.originalUrl);
 
-  res.send({uri: req.originalUrl});
+  lights.forEach(light => light.id && bob.setLightState(light.id, {bri: Math.round(Number(req.params.ratio) * 2.54)}));
+
+  res.send(response);
 };
 
 export {turnOn, turnOff, setBrightness};

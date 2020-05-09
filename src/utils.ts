@@ -1,14 +1,4 @@
-type ServerError = {
-  name: string;
-  message: string;
-};
-
-type APIResponse<T> = {
-  uri: string;
-  status: number;
-  errors: ServerError[];
-  results: T[];
-};
+import {APIResponse} from 'models';
 
 const hex2RGB = (hex: string): number[] => {
   const [, short, long] = String(hex).match(/^#?(?:([\da-f]{3})[\da-f]?|([\da-f]{6})(?:[\da-f]{2})?)$/i) || [];

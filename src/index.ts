@@ -64,7 +64,7 @@ app.get('/spotify/refresh-token', refreshToken);
 
 app.get('/hue/on/:color', turnOn);
 app.get('/hue/off/:id?', turnOff);
-app.get('/hue/brightness/:value', setBrightness);
+app.get('/hue/brightness/:ratio', setBrightness);
 
 app.get('/bluetooth/reset', resetBluetooth);
 app.get('/bluetooth/discover', discoverBluetooth);
