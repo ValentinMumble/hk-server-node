@@ -8,17 +8,17 @@ const shell = {
 };
 
 const resetBluetooth = (req: Request, res: Response) => {
-  exec(shell.reset, (_err, stdout) => {
-    const response = initResponse<string>(req.originalUrl);
-    response.results.push(stdout);
+  exec(shell.reset, () => {
+    const response = initResponse(req.originalUrl);
+    response.status = 204;
     res.send(response);
   });
 };
 
 const discoverBluetooth = (req: Request, res: Response) => {
-  exec(shell.discover, (_err, stdout) => {
-    const response = initResponse<string>(req.originalUrl);
-    response.results.push(stdout);
+  exec(shell.discover, () => {
+    const response = initResponse(req.originalUrl);
+    response.status = 204;
     res.send(response);
   });
 };

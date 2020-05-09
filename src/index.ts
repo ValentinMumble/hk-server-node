@@ -19,22 +19,16 @@ const app = express();
 let server;
 
 if (isProd) {
-  server = https.createServer(
-    {
-      key: fs.readFileSync(HTTPS_KEY_FILE),
-      cert: fs.readFileSync(HTTPS_CERT_FILE),
-    },
-    app
-  );
+  server = https.createServer({key: fs.readFileSync(HTTPS_KEY_FILE), cert: fs.readFileSync(HTTPS_CERT_FILE)}, app);
 } else {
   server = http.createServer(app);
 }
 
-const allowedOrigins = JSON.parse(ALLOWED_ORIGINS);
+const allowedOrigins: string[] = JSON.parse(ALLOWED_ORIGINS);
 app.use(
   cors({
     origin: (origin, callback) => {
-      origin && -1 === allowedOrigins.indexOf(origin)
+      origin && !allowedOrigins.includes(origin)
         ? callback(new Error(`Unallowed CORS: ${origin}`), false)
         : callback(null, true);
     },
@@ -49,8 +43,15 @@ const io = socketio(server);
 io.of('connect').on('connection', connectSocket);
 
 app.get('/soca/count', (req, res) => {
-  const response = initResponse(req.originalUrl);
-  response.results.push(Object.keys(io.sockets.sockets).length);
+  const response = initResponse<number>(req.originalUrl);
+  const clientCount = Object.keys(io.sockets.sockets).length;
+
+  if (0 === clientCount) {
+    response.status = 204;
+  } else {
+    response.results.push(clientCount);
+  }
+
   res.send(response);
 });
 
