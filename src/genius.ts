@@ -3,12 +3,12 @@ import {Request, Response} from 'express';
 //@ts-ignore TODO DefinitelyTyped
 import {getLyrics} from 'genius-lyrics-api';
 import {getCurrentTrackInternal} from './spotify';
-import {initResponse, addError} from './utils';
+import {initResponse, addError, sanitize} from './utils';
 
 const {GENIUS_TOKEN = ''} = process.env;
 
 const getLyricsInternal = async (artist: string, title: string) => {
-  const lyrics = await getLyrics({apiKey: GENIUS_TOKEN, title, artist});
+  const lyrics = await getLyrics({apiKey: GENIUS_TOKEN, artist: sanitize(artist), title: sanitize(title)});
 
   if (null === lyrics) {
     throw Error('No lyrics found');

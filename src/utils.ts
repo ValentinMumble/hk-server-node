@@ -10,6 +10,8 @@ const hex2RGB = (hex: string): number[] => {
   }
 };
 
+const sanitize = (string: string) => string.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 const initResponse = <T>(uri: string): APIResponse<T> => ({
   uri,
   status: 200,
@@ -22,4 +24,4 @@ const addError = <T>(response: APIResponse<T>, error: Error) => {
   response.errors.push({name: error.name, message: error.message});
 };
 
-export {hex2RGB, initResponse, addError};
+export {hex2RGB, sanitize, initResponse, addError};
