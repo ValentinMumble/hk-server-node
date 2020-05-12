@@ -47,8 +47,8 @@ const authorize = async (req: Request<{code: string}>, res: Response) => {
 
 const getAccessToken = (req: Request, res: Response) => {
   const response = initResponse(req.originalUrl);
-
   const accessToken = spotify.getAccessToken();
+
   if (accessToken) {
     if (Date.now() < expiresAt) {
       response.results.push(accessToken);
@@ -72,7 +72,6 @@ const addTrackToOK = async (req: Request, res: Response) => {
   try {
     await spotify.removeTracksFromPlaylist(SPO_OK_ID, [{uri: req.params.uri}]);
     await spotify.addTracksToPlaylist(SPO_OK_ID, [req.params.uri]);
-    response.status = 204;
   } catch (error) {
     addError(response, error);
   }
@@ -106,4 +105,35 @@ const getPlaylists = async (req: Request, res: Response) => {
   res.send(response);
 };
 
-export {addTrackToOK, authorize, getAccessToken, getDevices, getPlaylists, refreshToken};
+const getCurrentTrackInternal = async () => {
+  const {body} = await spotify.getMyCurrentPlayingTrack();
+
+  if (null === body.item) {
+    throw Error('No track currently playing');
+  }
+
+  return body.item;
+};
+
+const getCurrentTrack = async (req: Request, res: Response) => {
+  const response = initResponse(req.originalUrl);
+
+  try {
+    response.results.push(await getCurrentTrackInternal());
+  } catch (error) {
+    addError(response, error);
+  }
+
+  res.send(response);
+};
+
+export {
+  addTrackToOK,
+  authorize,
+  getAccessToken,
+  getCurrentTrack,
+  getCurrentTrackInternal,
+  getDevices,
+  getPlaylists,
+  refreshToken,
+};
