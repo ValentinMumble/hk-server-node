@@ -17,6 +17,7 @@ import {
   authorize,
   refreshToken,
   getCurrentTrack,
+  playCurrentTrackRadio,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 import {initResponse} from './utils';
@@ -69,6 +70,7 @@ app.get('/spotify/access-token', getAccessToken);
 app.get('/spotify/authorize/:code', authorize);
 app.get('/spotify/devices', getDevices);
 app.get('/spotify/playlists', getPlaylists);
+app.get('/spotify/radio', playCurrentTrackRadio);
 app.get('/spotify/refresh-token', refreshToken);
 app.get('/spotify/track', getCurrentTrack);
 

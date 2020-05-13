@@ -127,6 +127,21 @@ const getCurrentTrack = async (req: Request, res: Response) => {
   res.send(response);
 };
 
+const playCurrentTrackRadio = async (req: Request, res: Response) => {
+  const response = initResponse(req.originalUrl);
+
+  try {
+    const track = await getCurrentTrackInternal();
+    const recommandations = await spotify.getRecommendations({seed_tracks: [track.id], limit: 50});
+    const uris = recommandations.body.tracks.map(track => track.uri);
+    spotify.play({uris});
+  } catch (error) {
+    addError(response, error);
+  }
+
+  res.send(response);
+};
+
 export {
   addTrackToOK,
   authorize,
@@ -136,4 +151,5 @@ export {
   getDevices,
   getPlaylists,
   refreshToken,
+  playCurrentTrackRadio,
 };
