@@ -8,7 +8,7 @@ import bodyParser from 'body-parser';
 import socketio from 'socket.io';
 import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff, setBrightness} from './hue';
-import {discoverBluetooth, resetBluetooth} from './shell';
+import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot} from './shell';
 import {
   addTrackToOK,
   getAccessToken,
@@ -18,6 +18,7 @@ import {
   refreshToken,
   getCurrentTrack,
   playCurrentTrackRadio,
+  searchTracks,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 import {initResponse} from './utils';
@@ -73,6 +74,7 @@ app.get('/spotify/playlists', getPlaylists);
 app.get('/spotify/radio', playCurrentTrackRadio);
 app.get('/spotify/refresh-token', refreshToken);
 app.get('/spotify/track', getCurrentTrack);
+app.get('/spotify/search/:search', searchTracks);
 
 app.get('/hue/on/:color', turnOn);
 app.get('/hue/off/:id?', turnOff);
@@ -80,6 +82,9 @@ app.get('/hue/brightness/:ratio', setBrightness);
 
 app.get('/bluetooth/reset', resetBluetooth);
 app.get('/bluetooth/discover', discoverBluetooth);
+
+app.get('/raspotify/restart', restartRaspotify);
+app.get('/reboot', reboot);
 
 app.get('/lyrics/:artist/:title', getTrackLyrics);
 app.get('/lyrics/current', getCurrentTrackLyrics);

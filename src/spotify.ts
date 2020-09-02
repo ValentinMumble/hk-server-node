@@ -142,6 +142,19 @@ const playCurrentTrackRadio = async (req: Request, res: Response) => {
   res.send(response);
 };
 
+const searchTracks = async (req: Request<{search: string}>, res: Response) => {
+  const response = initResponse(req.originalUrl);
+
+  try {
+    const result = await spotify.searchTracks(req.params.search);
+    response.results = result.body.tracks?.items || [];
+  } catch (error) {
+    addError(response, error);
+  }
+
+  res.send(response);
+};
+
 export {
   addTrackToOK,
   authorize,
@@ -152,4 +165,5 @@ export {
   getPlaylists,
   refreshToken,
   playCurrentTrackRadio,
+  searchTracks,
 };
