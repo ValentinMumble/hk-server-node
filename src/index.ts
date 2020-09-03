@@ -17,6 +17,7 @@ import {
   authorize,
   refreshToken,
   getCurrentTrack,
+  playUri,
   playCurrentTrackRadio,
   searchTracks,
 } from './spotify';
@@ -70,6 +71,7 @@ app.get('/spotify/addok/:uri', addTrackToOK);
 app.get('/spotify/access-token', getAccessToken);
 app.get('/spotify/authorize/:code', authorize);
 app.get('/spotify/devices', getDevices);
+app.get('/spotify/play/:uri', playUri);
 app.get('/spotify/playlists', getPlaylists);
 app.get('/spotify/radio', playCurrentTrackRadio);
 app.get('/spotify/refresh-token', refreshToken);

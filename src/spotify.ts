@@ -127,6 +127,18 @@ const getCurrentTrack = async (req: Request, res: Response) => {
   res.send(response);
 };
 
+const playUri = async (req: Request<{uri: string}>, res: Response) => {
+  const response = initResponse(req.originalUrl);
+
+  try {
+    spotify.play({uris: [req.params.uri]});
+  } catch (error) {
+    addError(response, error);
+  }
+
+  res.send(response);
+};
+
 const playCurrentTrackRadio = async (req: Request, res: Response) => {
   const response = initResponse(req.originalUrl);
 
@@ -165,5 +177,6 @@ export {
   getPlaylists,
   refreshToken,
   playCurrentTrackRadio,
+  playUri,
   searchTracks,
 };
