@@ -158,7 +158,7 @@ const searchTracks = async (req: Request<{search: string}>, res: Response) => {
   const response = initResponse(req.originalUrl);
 
   try {
-    const result = await spotify.searchTracks(req.params.search);
+    const result = await spotify.searchTracks(req.params.search, {limit: 10});
     response.results = result.body.tracks?.items || [];
   } catch (error) {
     addError(response, error);
