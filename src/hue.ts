@@ -1,45 +1,47 @@
 import 'dotenv/config';
 import {Request, Response} from 'express';
-import {HueApi, lightState, ILight} from 'node-hue-api';
+import {v3} from 'node-hue-api';
+import Api, {Light} from 'node-hue-api/lib/api/Api';
+import LightState from 'node-hue-api/lib/model/lightstate/LightState';
 import {initResponse, hex2RGB} from './utils';
 
 const {ROBERT_HUE_IP = '', ROBERT_HUE_USERNAME = ''} = process.env;
 
-const bob = new HueApi(ROBERT_HUE_IP, ROBERT_HUE_USERNAME);
-let lights: ILight[] = [];
+let bob: Api;
+let lights: Light[] = [];
 
 (async () => {
-  const response = await bob.lights();
-  lights = response.lights;
+  bob = await v3.api.createInsecureLocal(ROBERT_HUE_IP).connect(ROBERT_HUE_USERNAME, false);
+  lights = await bob.lights.getAll();
 })();
 
 const turnOn = (req: Request<{color: string}>, res: Response) => {
   const response = initResponse(req.originalUrl);
   const [r, g, b] = hex2RGB(req.params.color);
-  const state = lightState.create().turnOn().brightness(100).rgb(r, g, b);
+  const state = new LightState().on(true).brightness(100).rgb(r, g, b);
 
-  lights.forEach(light => light.id && bob.setLightState(light.id, state));
+  lights.forEach(light => bob.lights.setLightState(light.id, state));
 
   res.send(response);
 };
 
-const turnOff = async (req: Request<{id: string}>, res: Response) => {
+const turnOff = (req: Request<{id: string}>, res: Response) => {
   const response = initResponse(req.originalUrl);
-  const offState = lightState.create().turnOff();
+  const offState = new LightState().off();
 
   if (req.params.id) {
-    await bob.setLightState(req.params.id, offState);
+    bob.lights.setLightState(req.params.id, offState);
   } else {
-    await bob.setGroupLightState(0, offState);
+    lights.forEach(light => bob.lights.setLightState(light.id, offState));
   }
 
   res.send(response);
 };
 
-const setBrightness = async (req: Request<{ratio: string}>, res: Response) => {
+const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
   const response = initResponse(req.originalUrl);
 
-  lights.forEach(light => light.id && bob.setLightState(light.id, {bri: Math.round(Number(req.params.ratio) * 2.54)}));
+  lights.forEach(light => bob.lights.setLightState(light.id, {bri: Math.round(Number(req.params.ratio) * 2.54)}));
 
   res.send(response);
 };
