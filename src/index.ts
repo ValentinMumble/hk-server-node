@@ -20,6 +20,7 @@ import {
   playUri,
   playCurrentTrackRadio,
   searchTracks,
+  storePalette,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 import {initResponse} from './utils';
@@ -66,6 +67,8 @@ app.get('/soca/count', (req, res) => {
 
   res.send(response);
 });
+
+app.post('/palette', storePalette);
 
 app.get('/spotify/addok/:uri', addTrackToOK);
 app.get('/spotify/access-token', getAccessToken);
