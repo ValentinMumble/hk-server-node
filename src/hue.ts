@@ -25,7 +25,7 @@ const turnOn = (req: Request<{color: string}>, res: Response) => {
   res.send(response);
 };
 
-const turnOff = (req: Request<{id: string}>, res: Response) => {
+const turnOff = (req: Request<{id?: string}>, res: Response) => {
   const response = initResponse(req.originalUrl);
   const offState = new LightState().off();
 
@@ -38,6 +38,16 @@ const turnOff = (req: Request<{id: string}>, res: Response) => {
   res.send(response);
 };
 
+const toggle = async (req: Request<{id: string}>, res: Response) => {
+  const response = initResponse<boolean>(req.originalUrl);
+  const currentState = (await bob.lights.getLightState(req.params.id)) as {on: boolean};
+
+  bob.lights.setLightState(req.params.id, currentState.on ? new LightState().off() : new LightState().on(true));
+  response.results.push(!currentState.on);
+
+  res.send(response);
+};
+
 const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
   const response = initResponse(req.originalUrl);
 
@@ -46,4 +56,17 @@ const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
   res.send(response);
 };
 
-export {turnOn, turnOff, setBrightness};
+const getLights = async (req: Request, res: Response) => {
+  const response = initResponse(req.originalUrl);
+  lights = await bob.lights.getAll();
+
+  response.results = lights.map(({_data}) => ({
+    id: _data.id,
+    name: _data.name,
+    isReachable: _data.state.reachable,
+  }));
+
+  res.send(response);
+};
+
+export {turnOn, turnOff, setBrightness, toggle, getLights};

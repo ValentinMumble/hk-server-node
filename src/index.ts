@@ -7,7 +7,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import socketio from 'socket.io';
 import connectSocket from 'spotify-connect-ws';
-import {turnOn, turnOff, setBrightness} from './hue';
+import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
 import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot} from './shell';
 import {
   addTrackToOK,
@@ -83,7 +83,9 @@ app.get('/spotify/search/:search', searchTracks);
 
 app.get('/hue/on/:color', turnOn);
 app.get('/hue/off/:id?', turnOff);
+app.get('/hue/toggle/:id', toggle);
 app.get('/hue/brightness/:ratio', setBrightness);
+app.get('/hue/lights', getLights);
 
 app.get('/bluetooth/reset', resetBluetooth);
 app.get('/bluetooth/discover', discoverBluetooth);
