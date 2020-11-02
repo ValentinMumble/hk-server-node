@@ -18,8 +18,8 @@
     "node-hue-api": "^4.0.9",
     "socket.io": "^2.2.0",
     "spotify-connect-ws": "https://github.com/ValentinMumble/spotify-connect-ws.git",
-    "spotify-web-api-node": "^4.0.0",
-    "typescript": "^4.0.2"
+    "spotify-web-api-node": "^5.0.0",
+    "typescript": "^4.0.5"
   },
   "scripts": {
     "postinstall": "cd ./node_modules/spotify-connect-ws && yarn install && yarn build",
@@ -30,9 +30,9 @@
     "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH && yarn stop-forever ; yarn start-forever\""
   },
   "devDependencies": {
-    "@types/cors": "^2.8.6",
+    "@types/cors": "^2.8.8",
     "@types/express": "^4.17.6",
-    "@types/node": "^14.6.4",
+    "@types/node": "^14.14.6",
     "@types/node-hue-api": "^2.3.0",
     "@types/socket.io": "^2.1.4",
     "@types/spotify-web-api-node": "^4.0.1"
