@@ -12,9 +12,9 @@ const hex2RGB = (hex: string): number[] => {
 
 const sanitize = (string: string) => string.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-const initResponse = <T>(uri: string): APIResponse<T> => ({
+const initResponse = <T>(uri: string, status: number = 200): APIResponse<T> => ({
   uri,
-  status: 200,
+  status,
   errors: [],
   results: [],
 });

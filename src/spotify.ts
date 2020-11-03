@@ -174,6 +174,20 @@ const searchTracks = async (req: Request<{search: string}>, res: Response) => {
   res.send(response);
 };
 
+const addToQueue = async (req: Request<{uri: string}>, res: Response) => {
+  const response = initResponse(req.originalUrl, 204);
+
+  try {
+    //TODO add type def, 204?
+    //@ts-ignore
+    await spotify.addToQueue(req.params.uri);
+  } catch (error) {
+    addError(response, error);
+  }
+
+  res.send(response);
+};
+
 export {
   addTrackToOK,
   authorize,
@@ -187,4 +201,5 @@ export {
   playUri,
   searchTracks,
   storePalette,
+  addToQueue,
 };
