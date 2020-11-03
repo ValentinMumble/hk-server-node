@@ -3,7 +3,7 @@ import {Request, Response} from 'express';
 //@ts-ignore TODO DefinitelyTyped
 import {getLyrics} from 'genius-lyrics-api';
 import {getCurrentTrackInternal} from './spotify';
-import {initResponse, addError, sanitize} from './utils';
+import {sanitize} from './utils';
 
 const {GENIUS_TOKEN = ''} = process.env;
 
@@ -11,35 +11,29 @@ const getLyricsInternal = async (artist: string, title: string) => {
   const lyrics = await getLyrics({apiKey: GENIUS_TOKEN, artist: sanitize(artist), title: sanitize(title)});
 
   if (null === lyrics) {
-    throw Error('No lyrics found');
+    throw new Error('No lyrics found');
   }
 
   return lyrics;
 };
 
-const getCurrentTrackLyrics = async (req: Request, res: Response) => {
-  const response = initResponse<string>(req.originalUrl);
-
+const getCurrentTrackLyrics = async (_: Request, res: Response) => {
   try {
     const track = await getCurrentTrackInternal();
-    response.results.push(await getLyricsInternal(track.artists[0].name, track.name));
+    const lyrics = await getLyricsInternal(track.artists[0].name, track.name);
+    res.send({result: lyrics});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send(error.message);
   }
-
-  res.send(response);
 };
 
 const getTrackLyrics = async (req: Request<{title: string; artist: string}>, res: Response) => {
-  const response = initResponse<string>(req.originalUrl);
-
   try {
-    response.results.push(await getLyricsInternal(req.params.artist, req.params.title));
+    const lyrics = await getLyricsInternal(req.params.artist, req.params.title);
+    res.send({result: lyrics});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send(error.message);
   }
-
-  res.send(response);
 };
 
 export {getTrackLyrics, getCurrentTrackLyrics};

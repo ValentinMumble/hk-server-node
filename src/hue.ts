@@ -3,7 +3,7 @@ import {Request, Response} from 'express';
 import {v3} from 'node-hue-api';
 import Api, {Light} from 'node-hue-api/lib/api/Api';
 import LightState from 'node-hue-api/lib/model/lightstate/LightState';
-import {initResponse, hex2RGB} from './utils';
+import {hex2RGB} from './utils';
 
 const {ROBERT_HUE_IP = '', ROBERT_HUE_USERNAME = ''} = process.env;
 
@@ -16,17 +16,15 @@ let lights: Light[] = [];
 })();
 
 const turnOn = (req: Request<{color: string}>, res: Response) => {
-  const response = initResponse(req.originalUrl);
   const [r, g, b] = hex2RGB(req.params.color);
   const state = new LightState().on(true).brightness(100).rgb(r, g, b);
 
   lights.forEach(light => bob.lights.setLightState(light.id, state));
 
-  res.send(response);
+  res.status(204).send();
 };
 
 const turnOff = (req: Request<{id?: string}>, res: Response) => {
-  const response = initResponse(req.originalUrl);
   const offState = new LightState().off();
 
   if (req.params.id) {
@@ -35,38 +33,33 @@ const turnOff = (req: Request<{id?: string}>, res: Response) => {
     lights.forEach(light => bob.lights.setLightState(light.id, offState));
   }
 
-  res.send(response);
+  res.status(204).send();
 };
 
 const toggle = async (req: Request<{id: string}>, res: Response) => {
-  const response = initResponse<boolean>(req.originalUrl);
   const currentState = (await bob.lights.getLightState(req.params.id)) as {on: boolean};
 
   bob.lights.setLightState(req.params.id, currentState.on ? new LightState().off() : new LightState().on(true));
-  response.results.push(!currentState.on);
 
-  res.send(response);
+  res.send({result: !currentState.on});
 };
 
 const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
   lights.forEach(light => bob.lights.setLightState(light.id, {bri: Math.round(Number(req.params.ratio) * 2.54)}));
 
-  res.send(response);
+  res.status(204).send();
 };
 
-const getLights = async (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
+const getLights = async (_: Request, res: Response) => {
   lights = await bob.lights.getAll();
 
-  response.results = lights.map(({_data}) => ({
+  const result = lights.map(({_data}) => ({
     id: _data.id,
     name: _data.name,
     isReachable: _data.state.reachable,
   }));
 
-  res.send(response);
+  res.send({result});
 };
 
 export {turnOn, turnOff, setBrightness, toggle, getLights};

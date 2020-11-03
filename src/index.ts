@@ -24,7 +24,6 @@ import {
   addToQueue,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
-import {initResponse} from './utils';
 
 const {ALLOWED_ORIGINS = '[]', APP_ENV, HTTPS_CERT_FILE = '', HTTPS_KEY_FILE = '', PORT} = process.env;
 
@@ -56,17 +55,14 @@ server.listen(PORT);
 const io = socketio(server);
 io.of('connect').on('connection', connectSocket);
 
-app.get('/soca/count', (req, res) => {
-  const response = initResponse<number>(req.originalUrl);
+app.get('/soca/count', (_, res) => {
   const clientCount = Object.keys(io.sockets.sockets).length;
 
   if (0 === clientCount) {
-    response.status = 204;
+    res.status(204).send();
   } else {
-    response.results.push(clientCount);
+    res.send({result: clientCount});
   }
-
-  res.send(response);
 });
 
 app.post('/palette', storePalette);

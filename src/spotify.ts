@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import {Request, Response} from 'express';
 import SpotifyWebApi from 'spotify-web-api-node';
-import {initResponse, addError} from './utils';
 
 const {SPO_CLIENT_ID, SPO_CLIENT_SECRET, SPO_OK_ID = '', SPO_SCOPE = ''} = process.env;
 
@@ -22,36 +21,27 @@ const storeToken = (expiration: number, accessToken: string, refreshToken?: stri
   expiresAt = Date.now() + expiration * 1000;
 };
 
-const refreshToken = async (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
+const refreshToken = async (_: Request, res: Response) => {
   try {
     const {body} = await spotify.refreshAccessToken();
     storeToken(body.expires_in, body.access_token);
-    response.results.push({accessToken: body.access_token});
+    res.send({result: {accessToken: body.access_token}});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
 const authorize = async (req: Request<{code: string}>, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
   try {
     const {body} = await spotify.authorizationCodeGrant(req.params.code);
     storeToken(body.expires_in, body.access_token, body.refresh_token);
-    response.results.push(body.access_token);
+    res.send({result: body.access_token});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
 const getAccessToken = (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
   const accessToken = spotify.getAccessToken();
   const result = {accessToken: '', authorizeUrl: '', palette};
 
@@ -65,51 +55,39 @@ const getAccessToken = (req: Request, res: Response) => {
   } else {
     // Unauthorized
     spotify.setRedirectURI(`${req.get('origin')}/callback`);
-    response.status = 401;
+    res.status(401);
     result.authorizeUrl = spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state');
   }
 
-  response.results.push(result);
-  res.send(response);
+  res.send({result});
 };
 
-const addTrackToOK = async (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
+const addTrackToOK = async (req: Request<{uri: string}>, res: Response) => {
   try {
     await spotify.removeTracksFromPlaylist(SPO_OK_ID, [{uri: req.params.uri}]);
     await spotify.addTracksToPlaylist(SPO_OK_ID, [req.params.uri]);
+    res.status(204).send();
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
-const getDevices = async (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
+const getDevices = async (_: Request, res: Response) => {
   try {
     const {body} = await spotify.getMyDevices();
-    response.results = body.devices;
+    res.send({result: body.devices});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
-const getPlaylists = async (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
+const getPlaylists = async (_: Request, res: Response) => {
   try {
     const {body} = await spotify.getUserPlaylists();
-    response.results = body.items;
+    res.send({result: body.items});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
 const getCurrentTrackInternal = async () => {
@@ -122,70 +100,54 @@ const getCurrentTrackInternal = async () => {
   return body.item;
 };
 
-const getCurrentTrack = async (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
+const getCurrentTrack = async (_: Request, res: Response) => {
   try {
-    response.results.push(await getCurrentTrackInternal());
+    const track = await getCurrentTrackInternal();
+    res.send({result: track});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
 const playUri = async (req: Request<{uri: string}>, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
   try {
     spotify.play({uris: [req.params.uri]});
+    res.status(204).send();
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
-const playCurrentTrackRadio = async (req: Request, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
+const playCurrentTrackRadio = async (_: Request, res: Response) => {
   try {
     const track = await getCurrentTrackInternal();
     const recommandations = await spotify.getRecommendations({seed_tracks: [track.id], limit: 50});
     const uris = recommandations.body.tracks.map(track => track.uri);
     spotify.play({uris});
+    res.status(204).send();
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
 const searchTracks = async (req: Request<{search: string}>, res: Response) => {
-  const response = initResponse(req.originalUrl);
-
   try {
     const result = await spotify.searchTracks(req.params.search, {limit: 10});
-    response.results = result.body.tracks?.items || [];
+    res.send({result: result.body.tracks?.items ?? []});
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
 const addToQueue = async (req: Request<{uri: string}>, res: Response) => {
-  const response = initResponse(req.originalUrl, 204);
-
   try {
-    //TODO add type def, 204?
+    //TODO add type def
     //@ts-ignore
     await spotify.addToQueue(req.params.uri);
+    res.status(204).send();
   } catch (error) {
-    addError(response, error);
+    res.status(500).send({...error});
   }
-
-  res.send(response);
 };
 
 export {

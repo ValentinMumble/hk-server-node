@@ -1,6 +1,5 @@
 import {exec} from 'child_process';
 import {Request, Response} from 'express';
-import {initResponse} from './utils';
 
 const shell = {
   discover: 'sudo hciconfig hci0 piscan',
@@ -12,11 +11,7 @@ const shell = {
 };
 
 const execShell = (command: string, req: Request, res: Response) => {
-  exec(command, () => {
-    const response = initResponse(req.originalUrl);
-    response.status = 204;
-    res.send(response);
-  });
+  exec(command, () => res.status(204).send());
 };
 
 const resetBluetooth = (req: Request, res: Response) => {
