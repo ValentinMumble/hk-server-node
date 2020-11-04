@@ -27,7 +27,7 @@ const refreshToken = async (_: Request, res: Response) => {
     storeToken(body.expires_in, body.access_token);
     res.send({result: {accessToken: body.access_token}});
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
@@ -37,7 +37,7 @@ const authorize = async (req: Request<{code: string}>, res: Response) => {
     storeToken(body.expires_in, body.access_token, body.refresh_token);
     res.send({result: body.access_token});
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
@@ -68,7 +68,7 @@ const addTrackToOK = async (req: Request<{uri: string}>, res: Response) => {
     await spotify.addTracksToPlaylist(SPO_OK_ID, [req.params.uri]);
     res.status(204).send();
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
@@ -77,7 +77,7 @@ const getDevices = async (_: Request, res: Response) => {
     const {body} = await spotify.getMyDevices();
     res.send({result: body.devices});
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
@@ -86,7 +86,7 @@ const getPlaylists = async (_: Request, res: Response) => {
     const {body} = await spotify.getUserPlaylists();
     res.send({result: body.items});
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
@@ -105,7 +105,7 @@ const getCurrentTrack = async (_: Request, res: Response) => {
     const track = await getCurrentTrackInternal();
     res.send({result: track});
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
@@ -114,7 +114,7 @@ const playUri = async (req: Request<{uri: string}>, res: Response) => {
     spotify.play({uris: [req.params.uri]});
     res.status(204).send();
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
@@ -126,27 +126,44 @@ const playCurrentTrackRadio = async (_: Request, res: Response) => {
     spotify.play({uris});
     res.status(204).send();
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
   }
 };
 
-const searchTracks = async (req: Request<{search: string}>, res: Response) => {
+const searchTracks = async ({params: {search}}: Request<{search: string}>, res: Response) => {
   try {
-    const result = await spotify.searchTracks(req.params.search, {limit: 10});
-    res.send({result: result.body.tracks?.items ?? []});
+    const {
+      body: {tracks},
+    } = await spotify.searchTracks(search, {limit: 10});
+    res.send({result: tracks?.items ?? []});
   } catch (error) {
-    res.status(500).send({...error});
+    //res.status(500).send(error);
   }
 };
 
-const addToQueue = async (req: Request<{uri: string}>, res: Response) => {
+const addToQueue = async ({params: {uri}}: Request<{uri: string}>, res: Response) => {
   try {
     //TODO add type def
     //@ts-ignore
-    await spotify.addToQueue(req.params.uri);
+    await spotify.addToQueue(uri);
     res.status(204).send();
   } catch (error) {
-    res.status(500).send({...error});
+    res.status(500).send(error);
+  }
+};
+
+const getArtistTopTracks = async (
+  {params: {artistId, country = 'GB'}}: Request<{artistId: string; country?: string}>,
+  res: Response
+) => {
+  try {
+    const {
+      body: {tracks},
+    } = await spotify.getArtistTopTracks(artistId, country);
+    const {body} = await spotify.getArtist(artistId);
+    res.send({result: {tracks, artist: body}});
+  } catch (error) {
+    res.status(500).send(error);
   }
 };
 
@@ -164,4 +181,5 @@ export {
   searchTracks,
   storePalette,
   addToQueue,
+  getArtistTopTracks,
 };

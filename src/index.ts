@@ -22,6 +22,7 @@ import {
   searchTracks,
   storePalette,
   addToQueue,
+  getArtistTopTracks,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 
@@ -78,6 +79,7 @@ app.get('/spotify/refresh-token', refreshToken);
 app.get('/spotify/track', getCurrentTrack);
 app.get('/spotify/search/:search', searchTracks);
 app.get('/spotify/queue/:uri', addToQueue);
+app.get('/spotify/artist/:artistId/top/:country?', getArtistTopTracks);
 
 app.get('/hue/on/:color', turnOn);
 app.get('/hue/off/:id?', turnOff);
