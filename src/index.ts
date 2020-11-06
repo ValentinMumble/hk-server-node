@@ -5,7 +5,7 @@ import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import socketio from 'socket.io';
+import {Server} from 'socket.io';
 import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
 import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot} from './shell';
@@ -53,7 +53,13 @@ app.use(bodyParser.json());
 
 server.listen(PORT);
 
-const io = socketio(server);
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
 io.of('connect').on('connection', connectSocket);
 
 app.get('/soca/count', (_, res) => {
