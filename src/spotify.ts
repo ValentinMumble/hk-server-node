@@ -25,7 +25,7 @@ const refreshToken = async (_: Request, res: Response) => {
   try {
     const {body} = await spotify.refreshAccessToken();
     storeToken(body.expires_in, body.access_token);
-    res.send({result: {accessToken: body.access_token}});
+    res.send({accessToken: body.access_token});
   } catch (error) {
     res.status(500).send(error);
   }
@@ -35,7 +35,7 @@ const authorize = async (req: Request<{code: string}>, res: Response) => {
   try {
     const {body} = await spotify.authorizationCodeGrant(req.params.code);
     storeToken(body.expires_in, body.access_token, body.refresh_token);
-    res.send({result: body.access_token});
+    res.send({accessToken: body.access_token});
   } catch (error) {
     res.status(500).send(error);
   }
@@ -43,11 +43,11 @@ const authorize = async (req: Request<{code: string}>, res: Response) => {
 
 const getAccessToken = (req: Request, res: Response) => {
   const accessToken = spotify.getAccessToken();
-  const result = {accessToken: '', authorizeUrl: '', palette};
+  const data = {accessToken: '', authorizeUrl: '', palette};
 
   if (accessToken) {
     if (Date.now() < expiresAt) {
-      result.accessToken = accessToken;
+      data.accessToken = accessToken;
     } else {
       // Token expired
       return refreshToken(req, res);
@@ -56,10 +56,10 @@ const getAccessToken = (req: Request, res: Response) => {
     // Unauthorized
     spotify.setRedirectURI(`${req.get('origin')}/callback`);
     res.status(401);
-    result.authorizeUrl = spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state');
+    data.authorizeUrl = spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state');
   }
 
-  res.send({result});
+  res.send(data);
 };
 
 const addTrackToOK = async (req: Request<{uri: string}>, res: Response) => {
@@ -74,8 +74,10 @@ const addTrackToOK = async (req: Request<{uri: string}>, res: Response) => {
 
 const getDevices = async (_: Request, res: Response) => {
   try {
-    const {body} = await spotify.getMyDevices();
-    res.send({result: body.devices});
+    const {
+      body: {devices},
+    } = await spotify.getMyDevices();
+    res.send(devices);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -83,8 +85,10 @@ const getDevices = async (_: Request, res: Response) => {
 
 const getPlaylists = async (_: Request, res: Response) => {
   try {
-    const {body} = await spotify.getUserPlaylists();
-    res.send({result: body.items});
+    const {
+      body: {items},
+    } = await spotify.getUserPlaylists();
+    res.send(items);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -103,7 +107,7 @@ const getCurrentTrackInternal = async () => {
 const getCurrentTrack = async (_: Request, res: Response) => {
   try {
     const track = await getCurrentTrackInternal();
-    res.send({result: track});
+    res.send(track);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -135,9 +139,9 @@ const searchTracks = async ({params: {search}}: Request<{search: string}>, res: 
     const {
       body: {tracks},
     } = await spotify.searchTracks(search, {limit: 10});
-    res.send({result: tracks?.items ?? []});
+    res.send(tracks?.items ?? []);
   } catch (error) {
-    //res.status(500).send(error);
+    res.status(500).send(error);
   }
 };
 
@@ -161,7 +165,7 @@ const getArtistTopTracks = async (
       body: {tracks},
     } = await spotify.getArtistTopTracks(artistId, country);
     const {body} = await spotify.getArtist(artistId);
-    res.send({result: {tracks, artist: body}});
+    res.send({tracks, artist: body});
   } catch (error) {
     res.status(500).send(error);
   }

@@ -62,7 +62,7 @@ app.get('/soca/count', (_, res) => {
   if (0 === clientCount) {
     res.status(204).send();
   } else {
-    res.send({result: clientCount});
+    res.send(JSON.stringify(clientCount));
   }
 });
 
