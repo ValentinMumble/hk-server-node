@@ -10,7 +10,7 @@ import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
 import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot} from './shell';
 import {
-  addTrackToOK,
+  addTrackToPlaylist,
   getAccessToken,
   getDevices,
   getPlaylists,
@@ -68,27 +68,27 @@ app.get('/soca/count', (_, res) => {
 
 app.post('/palette', storePalette);
 
-app.get('/spotify/addok/:uri', addTrackToOK);
 app.get('/spotify/access-token', getAccessToken);
+app.get('/spotify/artist/:artistId/top/:country?', getArtistTopTracks);
 app.get('/spotify/authorize/:code', authorize);
-app.get('/spotify/devices', getDevices);
+app.get('/spotify/device', getDevices);
 app.get('/spotify/play/:uri', playUri);
-app.get('/spotify/playlists', getPlaylists);
+app.get('/spotify/playlist', getPlaylists);
+app.get('/spotify/playlist/add/:uri/:playlistId?', addTrackToPlaylist);
+app.get('/spotify/queue/:uri', addToQueue);
 app.get('/spotify/radio', playCurrentTrackRadio);
 app.get('/spotify/refresh-token', refreshToken);
 app.get('/spotify/track', getCurrentTrack);
 app.get('/spotify/search/:search', searchTracks);
-app.get('/spotify/queue/:uri', addToQueue);
-app.get('/spotify/artist/:artistId/top/:country?', getArtistTopTracks);
 
 app.get('/hue/on/:color', turnOn);
 app.get('/hue/off/:id?', turnOff);
 app.get('/hue/toggle/:id', toggle);
 app.get('/hue/brightness/:ratio', setBrightness);
-app.get('/hue/lights', getLights);
+app.get('/hue/light', getLights);
 
-app.get('/bluetooth/reset', resetBluetooth);
 app.get('/bluetooth/discover', discoverBluetooth);
+app.get('/bluetooth/reset', resetBluetooth);
 
 app.get('/raspotify/restart', restartRaspotify);
 app.get('/reboot', reboot);

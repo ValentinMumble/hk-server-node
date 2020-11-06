@@ -2,7 +2,16 @@ import 'dotenv/config';
 import {Request, Response} from 'express';
 import SpotifyWebApi from 'spotify-web-api-node';
 
-const {SPO_CLIENT_ID, SPO_CLIENT_SECRET, SPO_OK_ID = '', SPO_SCOPE = ''} = process.env;
+const {SPO_CLIENT_ID, SPO_CLIENT_SECRET, SPO_OK_ID = ''} = process.env;
+
+const SCOPES = [
+  'user-read-playback-state',
+  'user-read-currently-playing',
+  'user-modify-playback-state',
+  'user-library-read',
+  'playlist-modify-private',
+  'playlist-read-private',
+];
 
 const spotify = new SpotifyWebApi({
   clientId: SPO_CLIENT_ID,
@@ -11,8 +20,8 @@ const spotify = new SpotifyWebApi({
 let expiresAt: number = 0;
 let palette: string[] = [];
 
-const storePalette = (req: Request) => {
-  palette = req.body;
+const storePalette = ({body}: Request) => {
+  palette = body;
 };
 
 const storeToken = (expiration: number, accessToken: string, refreshToken?: string) => {
@@ -31,9 +40,9 @@ const refreshToken = async (_: Request, res: Response) => {
   }
 };
 
-const authorize = async (req: Request<{code: string}>, res: Response) => {
+const authorize = async ({params: {code}}: Request<{code: string}>, res: Response) => {
   try {
-    const {body} = await spotify.authorizationCodeGrant(req.params.code);
+    const {body} = await spotify.authorizationCodeGrant(code);
     storeToken(body.expires_in, body.access_token, body.refresh_token);
     res.send({accessToken: body.access_token});
   } catch (error) {
@@ -56,16 +65,19 @@ const getAccessToken = (req: Request, res: Response) => {
     // Unauthorized
     spotify.setRedirectURI(`${req.get('origin')}/callback`);
     res.status(401);
-    data.authorizeUrl = spotify.createAuthorizeURL(SPO_SCOPE.split(' '), 'state');
+    data.authorizeUrl = spotify.createAuthorizeURL(SCOPES, 'state');
   }
 
   res.send(data);
 };
 
-const addTrackToOK = async (req: Request<{uri: string}>, res: Response) => {
+const addTrackToPlaylist = async (
+  {params: {uri, playlistId = SPO_OK_ID}}: Request<{uri: string; playlistId?: string}>,
+  res: Response
+) => {
   try {
-    await spotify.removeTracksFromPlaylist(SPO_OK_ID, [{uri: req.params.uri}]);
-    await spotify.addTracksToPlaylist(SPO_OK_ID, [req.params.uri]);
+    await spotify.removeTracksFromPlaylist(playlistId, [{uri}]);
+    await spotify.addTracksToPlaylist(playlistId, [uri]);
     res.status(204).send();
   } catch (error) {
     res.status(500).send(error);
@@ -113,9 +125,9 @@ const getCurrentTrack = async (_: Request, res: Response) => {
   }
 };
 
-const playUri = async (req: Request<{uri: string}>, res: Response) => {
+const playUri = async ({params: {uri}}: Request<{uri: string}>, res: Response) => {
   try {
-    spotify.play({uris: [req.params.uri]});
+    spotify.play({uris: [uri]});
     res.status(204).send();
   } catch (error) {
     res.status(500).send(error);
@@ -147,8 +159,6 @@ const searchTracks = async ({params: {search}}: Request<{search: string}>, res: 
 
 const addToQueue = async ({params: {uri}}: Request<{uri: string}>, res: Response) => {
   try {
-    //TODO add type def
-    //@ts-ignore
     await spotify.addToQueue(uri);
     res.status(204).send();
   } catch (error) {
@@ -172,7 +182,7 @@ const getArtistTopTracks = async (
 };
 
 export {
-  addTrackToOK,
+  addTrackToPlaylist,
   authorize,
   getAccessToken,
   getCurrentTrack,
