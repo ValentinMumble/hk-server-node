@@ -5,7 +5,7 @@ import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import socketio from 'socket.io';
+import {Server} from 'socket.io';
 import connectSocket from 'spotify-connect-ws';
 import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
 import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot} from './shell';
@@ -26,7 +26,14 @@ import {
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 
-const {ALLOWED_ORIGINS = '[]', APP_ENV, HTTPS_CERT_FILE = '', HTTPS_KEY_FILE = '', PORT} = process.env;
+const {
+  ALLOWED_ORIGINS = '[]',
+  APP_ENV,
+  HTTPS_CERT_FILE = '',
+  HTTPS_KEY_FILE = '',
+  PORT,
+  WS_NAMESPACE = '',
+} = process.env;
 
 const isProd = 'prod' === APP_ENV;
 const app = express();
@@ -53,11 +60,17 @@ app.use(bodyParser.json());
 
 server.listen(PORT);
 
-const io = socketio(server);
-io.of('connect').on('connection', connectSocket);
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+io.of(WS_NAMESPACE).on('connection', connectSocket);
 
 app.get('/soca/count', (_, res) => {
-  const clientCount = Object.keys(io.sockets.sockets).length;
+  const clientCount = io.of(WS_NAMESPACE).sockets.size;
 
   if (0 === clientCount) {
     res.status(204).send();
