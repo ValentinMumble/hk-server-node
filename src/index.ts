@@ -26,7 +26,14 @@ import {
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 
-const {ALLOWED_ORIGINS = '[]', APP_ENV, HTTPS_CERT_FILE = '', HTTPS_KEY_FILE = '', PORT} = process.env;
+const {
+  ALLOWED_ORIGINS = '[]',
+  APP_ENV,
+  HTTPS_CERT_FILE = '',
+  HTTPS_KEY_FILE = '',
+  PORT,
+  WS_NAMESPACE = '',
+} = process.env;
 
 const isProd = 'prod' === APP_ENV;
 const app = express();
@@ -60,10 +67,10 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-io.of('connect').on('connection', connectSocket);
+io.of(WS_NAMESPACE).on('connection', connectSocket);
 
 app.get('/soca/count', (_, res) => {
-  const clientCount = Object.keys(io.sockets.sockets).length;
+  const clientCount = io.of(WS_NAMESPACE).sockets.size;
 
   if (0 === clientCount) {
     res.status(204).send();
