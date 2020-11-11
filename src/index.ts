@@ -53,6 +53,7 @@ app.use(
         ? callback(new Error(`Unallowed CORS: ${origin}`), false)
         : callback(null, true);
     },
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
   })
 );
 app.use(bodyParser.urlencoded({extended: true}));
