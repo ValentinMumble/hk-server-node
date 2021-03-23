@@ -49,7 +49,23 @@ const getMessage = (error: SpotifyError | Error | string) => {
   return error.message;
 };
 
-const spotifyConnectWs = (socket: SpotifySocket) => {
+const spotifyConnectWs = (ogSocket: Socket) => {
+  let timeoutId: NodeJS.Timeout;
+  let socket: SpotifySocket = Object.assign(ogSocket, {
+    hasSentInitialState: false,
+    hasNotifiedTrackEnd: false,
+    lastSentError: '',
+    pollRate: C.POLL_RATE,
+    playerState: undefined,
+    poll: () => {},
+  });
+
+  const emit = (event: string, ...args: any) => {
+    console.log('emit', event);
+
+    return socket.emit(event, ...args);
+  };
+
   const handleError = (error: SpotifyError | Error | string) => {
     const message = getMessage(error);
     console.error('Error message:', message);
@@ -61,10 +77,10 @@ const spotifyConnectWs = (socket: SpotifySocket) => {
         restartRaspotify();
       } else if ('No active device' === message || 'Player command failed: No active device found' === message) {
         console.log('Transfering playback', SPO_PI_ID);
-        //@ts-ignore TODO update definetelyTyped def here
+        //@ts-ignore TODO update definitelyTyped def here
         spotify.transferMyPlayback([SPO_PI_ID], {play: false}).catch(handleError);
       } else {
-        socket.emit(C.CONNECT_ERROR, message);
+        emit(C.CONNECT_ERROR, message);
       }
       socket.lastSentError = message;
     } else {
@@ -73,22 +89,23 @@ const spotifyConnectWs = (socket: SpotifySocket) => {
   };
 
   socket.on('disconnect', () => {
+    clearTimeout(timeoutId);
     socket.poll = () => {};
   });
 
   socket.on('initiate', () => {
     if (!spotify.getAccessToken()) {
-      return socket.emit(
-        C.CONNECT_ERROR,
-        'An access token is required in order to start listening for playback events'
-      );
+      return emit(C.CONNECT_ERROR, 'An access token is required in order to start listening for playback events');
     }
 
+    //Useless?
     socket.pollRate = C.POLL_RATE;
+    socket.poll = poll;
+
     socket.poll();
   });
 
-  socket.poll = async () => {
+  const poll = async () => {
     try {
       const {body: playerState} = await spotify.getMyCurrentPlaybackState();
 
@@ -99,7 +116,7 @@ const spotifyConnectWs = (socket: SpotifySocket) => {
       }
 
       if (!socket.hasSentInitialState) {
-        socket.emit('initial_state', playerState);
+        emit('initial_state', playerState);
         socket.playerState = playerState;
         socket.hasSentInitialState = true;
         return;
@@ -110,7 +127,7 @@ const spotifyConnectWs = (socket: SpotifySocket) => {
 
       if (playerState.item.id !== socket.playerState.item.id) {
         // track has changed
-        socket.emit('track_change', playerState.item);
+        emit('track_change', playerState.item);
         socket.hasNotifiedTrackEnd = false;
       }
 
@@ -118,21 +135,21 @@ const spotifyConnectWs = (socket: SpotifySocket) => {
       const negativeProgress = playerState.progress_ms > socket.playerState.progress_ms + C.HAS_SCRUBBED_THRESHOLD;
       const positiveProgess = playerState.progress_ms < socket.playerState.progress_ms - C.HAS_SCRUBBED_THRESHOLD;
       if (negativeProgress || positiveProgess) {
-        socket.emit('seek', playerState.progress_ms, playerState.timestamp);
+        emit('seek', playerState.progress_ms, playerState.timestamp);
       }
       if (playerState.is_playing !== socket.playerState.is_playing) {
         // play state has changed
         const event = playerState.is_playing ? 'playback_started' : 'playback_paused';
-        socket.emit(event);
+        emit(event);
       }
       if (playerState.device.id !== socket.playerState.device.id) {
         // device has changed
-        socket.emit('device_change', playerState.device);
+        emit('device_change', playerState.device);
       } else {
         // device is the same, check volume
         if (playerState.device.volume_percent !== socket.playerState.device.volume_percent) {
           // volume has changed
-          socket.emit('volume_change', playerState.device.volume_percent);
+          emit('volume_change', playerState.device.volume_percent);
         }
       }
 
@@ -140,16 +157,16 @@ const spotifyConnectWs = (socket: SpotifySocket) => {
         !socket.hasNotifiedTrackEnd &&
         playerState.progress_ms + C.HAS_FINISHED_THRESHOLD > playerState.item.duration_ms
       ) {
-        socket.emit('track_end', playerState.item);
+        emit('track_end', playerState.item);
         socket.hasNotifiedTrackEnd = true;
       }
 
       socket.playerState = playerState;
     } catch (error) {
       handleError(error);
+    } finally {
+      timeoutId = setTimeout(socket.poll, socket.pollRate);
     }
-
-    setTimeout(socket.poll, socket.pollRate);
   };
 
   socket.on('play', (track?: {context_uri?: string; uris?: string[]}) => {

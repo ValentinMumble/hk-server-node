@@ -119,7 +119,7 @@ const getCurrentTrackInternal = async () => {
     throw Error('No track currently playing');
   }
 
-  return body.item;
+  return body.item as SpotifyApi.TrackObjectFull;
 };
 
 const getCurrentTrack = async (_: Request, res: Response) => {
