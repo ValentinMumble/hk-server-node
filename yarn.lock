@@ -870,11 +870,6 @@ negotiator@0.6.2:
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.2.tgz#feacf7ccf525a77ae9634436a64883ffeca346fb"
   integrity sha512-hZXc7K2e+PgeI1eDBe/10Ard4ekbfrrqG8Ep+8Jmf4JID2bNg7NvCPOZN+kfF574pFQI7mum2AUqDidoKqcTOw==
 
-node-fetch@^2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
-  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
-
 node-hue-api@^4.0.9:
   version "4.0.9"
   resolved "https://registry.yarnpkg.com/node-hue-api/-/node-hue-api-4.0.9.tgz#ed11cf4ee94bcdb0c339775e98213b5047d08314"
@@ -1139,12 +1134,6 @@ source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
-
-"spotify-connect-ws@https://github.com/ValentinMumble/spotify-connect-ws.git":
-  version "0.1.2"
-  resolved "https://github.com/ValentinMumble/spotify-connect-ws.git#31cb7905718ed2d65bc53bb1db11785aefebe49d"
-  dependencies:
-    node-fetch "^2.6.1"
 
 spotify-web-api-node@^5.0.0:
   version "5.0.0"

@@ -17,7 +17,6 @@
     "genius-lyrics-api": "^3.0.3",
     "node-hue-api": "^4.0.9",
     "socket.io": "^3.0.0",
-    "spotify-connect-ws": "https://github.com/ValentinMumble/spotify-connect-ws.git",
     "spotify-web-api-node": "^5.0.0",
     "typescript": "^4.0.5"
   },

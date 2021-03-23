@@ -6,7 +6,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import {Server} from 'socket.io';
-import connectSocket from 'spotify-connect-ws';
+import connectSocket from './socket';
 import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
 import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot} from './shell';
 import {
@@ -26,14 +26,11 @@ import {
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 
-const {
-  ALLOWED_ORIGINS = '[]',
-  APP_ENV,
-  HTTPS_CERT_FILE = '',
-  HTTPS_KEY_FILE = '',
-  PORT,
-  WS_NAMESPACE = '',
-} = process.env;
+const {ALLOWED_ORIGINS, APP_ENV, HTTPS_CERT_FILE = '', HTTPS_KEY_FILE = '', PORT, WS_NAMESPACE = ''} = process.env;
+
+if (!ALLOWED_ORIGINS) {
+  throw new Error('Allowed origins must be set in .env');
+}
 
 const isProd = 'prod' === APP_ENV;
 const app = express();
@@ -64,7 +61,7 @@ server.listen(PORT);
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true,
   },
 });

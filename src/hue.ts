@@ -1,19 +1,27 @@
 import 'dotenv/config';
 import {Request, Response} from 'express';
 import {v3} from 'node-hue-api';
-import Api, {Light} from 'node-hue-api/lib/api/Api';
+import Api from 'node-hue-api/lib/api/Api';
 import LightState from 'node-hue-api/lib/model/lightstate/LightState';
 import {hex2RGB} from './utils';
 
 const {ROBERT_HUE_IP = '', ROBERT_HUE_USERNAME = ''} = process.env;
 
+type Light = {
+  id: number;
+  name: string;
+  isReachable: boolean;
+};
+
 let bob: Api;
 let lights: Light[] = [];
 
-(async () => {
-  bob = await v3.api.createInsecureLocal(ROBERT_HUE_IP).connect(ROBERT_HUE_USERNAME, false);
-  lights = await bob.lights.getAll();
-})();
+const fetchLights = async (): Promise<Light[]> =>
+  (await bob.lights.getAll()).map(({_data}) => ({
+    id: _data.id,
+    name: _data.name,
+    isReachable: _data.state.reachable,
+  }));
 
 const turnOn = (req: Request<{color: string}>, res: Response) => {
   const [r, g, b] = hex2RGB(req.params.color);
@@ -51,15 +59,14 @@ const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
 };
 
 const getLights = async (_: Request, res: Response) => {
-  lights = await bob.lights.getAll();
+  lights = await fetchLights();
 
-  const data = lights.map(({_data}) => ({
-    id: _data.id,
-    name: _data.name,
-    isReachable: _data.state.reachable,
-  }));
-
-  res.send(data);
+  res.send(await bob.lights.getAll());
 };
+
+(async () => {
+  bob = await v3.api.createInsecureLocal(ROBERT_HUE_IP).connect(ROBERT_HUE_USERNAME, false);
+  lights = await fetchLights();
+})();
 
 export {turnOn, turnOff, setBrightness, toggle, getLights};

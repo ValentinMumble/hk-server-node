@@ -25,16 +25,22 @@ const storePalette = ({body}: Request) => {
 };
 
 const storeToken = (expiration: number, accessToken: string, refreshToken?: string) => {
+  console.log('Storing token', accessToken);
   spotify.setAccessToken(accessToken);
   if (refreshToken) spotify.setRefreshToken(refreshToken);
   expiresAt = Date.now() + expiration * 1000;
 };
 
+const refreshTokenInternal = async () => {
+  console.log('Refreshing token');
+  const {body} = await spotify.refreshAccessToken();
+  storeToken(body.expires_in, body.access_token);
+};
+
 const refreshToken = async (_: Request, res: Response) => {
   try {
-    const {body} = await spotify.refreshAccessToken();
-    storeToken(body.expires_in, body.access_token);
-    res.send({accessToken: body.access_token});
+    await refreshTokenInternal();
+    res.send({accessToken: spotify.getAccessToken()});
   } catch (error) {
     res.status(500).send(error);
   }
@@ -196,4 +202,6 @@ export {
   storePalette,
   addToQueue,
   getArtistTopTracks,
+  spotify,
+  refreshTokenInternal,
 };

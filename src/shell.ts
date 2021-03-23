@@ -10,8 +10,10 @@ const shell = {
   reboot: 'sudo reboot',
 };
 
-const execShell = (command: string, req: Request, res: Response) => {
-  exec(command, () => res.status(204).send());
+const execShell = (command: string, _?: Request, res?: Response) => {
+  exec(command, () => {
+    if (res) res.status(204).send();
+  });
 };
 
 const resetBluetooth = (req: Request, res: Response) => {
@@ -22,7 +24,7 @@ const discoverBluetooth = (req: Request, res: Response) => {
   execShell(shell.discover, req, res);
 };
 
-const restartRaspotify = (req: Request, res: Response) => {
+const restartRaspotify = (req?: Request, res?: Response) => {
   execShell(shell.raspotify.restart, req, res);
 };
 
