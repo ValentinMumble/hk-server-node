@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import {spotify} from './spotify';
+import {refreshTokenInternal, spotify} from './spotify';
 import {restartRaspotify} from './shell';
 import {Socket} from 'socket.io';
 
@@ -61,7 +61,7 @@ const spotifyConnectWs = (ogSocket: Socket) => {
   });
 
   const emit = (event: string, ...args: any) => {
-    console.log('emit', event);
+    // console.log('emit', event);
 
     return socket.emit(event, ...args);
   };
@@ -71,7 +71,7 @@ const spotifyConnectWs = (ogSocket: Socket) => {
     console.error('Error message:', message);
     if (message !== socket.lastSentError) {
       if ('The access token expired' === message) {
-        //refreshTokenInternal();
+        refreshTokenInternal();
       } else if ('Device not found' === message) {
         console.log('Restarting raspotify');
         restartRaspotify();
