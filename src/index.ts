@@ -8,7 +8,7 @@ import bodyParser from 'body-parser';
 import {Server} from 'socket.io';
 import connectSocket from './socket';
 import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
-import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot} from './shell';
+import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot, getLogs} from './shell';
 import {
   addTrackToPlaylist,
   getAccessToken,
@@ -67,7 +67,7 @@ const io = new Server(server, {
 });
 io.of(WS_NAMESPACE).on('connection', connectSocket);
 
-app.get('/soca/count', (_, res) => {
+app.get('/soca/count', (_req, res) => {
   const clientCount = io.of(WS_NAMESPACE).sockets.size;
 
   if (0 === clientCount) {
@@ -103,6 +103,7 @@ app.get('/bluetooth/reset', resetBluetooth);
 
 app.get('/raspotify/restart', restartRaspotify);
 app.get('/reboot', reboot);
+app.get('/logs', getLogs);
 
 app.get('/lyrics/:artist/:title', getTrackLyrics);
 app.get('/lyrics/current', getCurrentTrackLyrics);

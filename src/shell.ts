@@ -8,6 +8,7 @@ const shell = {
     restart: 'sudo systemctl restart raspotify',
   },
   reboot: 'sudo reboot',
+  logs: 'tail --lines=100 /home/pi/.forever/hk-server-node.log',
 };
 
 const execShell = (command: string, _?: Request, res?: Response) => {
@@ -32,4 +33,14 @@ const reboot = (req: Request, res: Response) => {
   execShell(shell.reboot, req, res);
 };
 
-export {resetBluetooth, discoverBluetooth, restartRaspotify, reboot};
+const getLogs = (_req: Request, res: Response) => {
+  exec(shell.logs, (error, logs) => {
+    if (error) {
+      throw error;
+    } else {
+      res.send(JSON.stringify(logs));
+    }
+  });
+};
+
+export {resetBluetooth, discoverBluetooth, restartRaspotify, reboot, getLogs};
