@@ -22,7 +22,7 @@ let palette: string[] = [];
 
 const storePalette = ({body}: Request, res: Response) => {
   palette = body;
-  res.send();
+  res.status(204).send();
 };
 
 const storeToken = (expiration: number, accessToken: string, refreshToken?: string) => {
