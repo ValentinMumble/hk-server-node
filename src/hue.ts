@@ -61,7 +61,7 @@ const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
 const getLights = async (_: Request, res: Response) => {
   lights = await fetchLights();
 
-  res.send(await bob.lights.getAll());
+  res.send(lights);
 };
 
 (async () => {

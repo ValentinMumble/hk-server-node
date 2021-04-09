@@ -71,7 +71,11 @@ const spotifyConnectWs = (ogSocket: Socket) => {
     console.error('Error message:', message);
     if (message !== socket.lastSentError) {
       if ('The access token expired' === message) {
-        await refreshTokenInternal();
+        try {
+          await refreshTokenInternal();
+        } catch (error) {
+          handleError(error);
+        }
       } else if ('Device not found' === message) {
         console.log('Restarting raspotify');
         restartRaspotify();

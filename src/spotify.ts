@@ -20,8 +20,9 @@ const spotify = new SpotifyWebApi({
 let expiresAt: number = 0;
 let palette: string[] = [];
 
-const storePalette = ({body}: Request) => {
+const storePalette = ({body}: Request, res: Response) => {
   palette = body;
+  res.send();
 };
 
 const storeToken = (expiration: number, accessToken: string, refreshToken?: string) => {
