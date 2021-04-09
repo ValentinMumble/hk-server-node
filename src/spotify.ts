@@ -41,7 +41,7 @@ const refreshTokenInternal = async () => {
 const refreshToken = async (_: Request, res: Response) => {
   try {
     await refreshTokenInternal();
-    res.send({accessToken: spotify.getAccessToken()});
+    res.json({accessToken: spotify.getAccessToken()});
   } catch (error) {
     res.status(500).send(error);
   }
@@ -51,7 +51,7 @@ const authorize = async ({params: {code}}: Request<{code: string}>, res: Respons
   try {
     const {body} = await spotify.authorizationCodeGrant(code);
     storeToken(body.expires_in, body.access_token, body.refresh_token);
-    res.send({accessToken: body.access_token});
+    res.json({accessToken: body.access_token});
   } catch (error) {
     res.status(500).send(error);
   }
@@ -75,7 +75,7 @@ const getAccessToken = (req: Request, res: Response) => {
     data.authorizeUrl = spotify.createAuthorizeURL(SCOPES, 'state');
   }
 
-  res.send(data);
+  res.json(data);
 };
 
 const addTrackToPlaylist = async (
@@ -96,7 +96,7 @@ const getDevices = async (_: Request, res: Response) => {
     const {
       body: {devices},
     } = await spotify.getMyDevices();
-    res.send(devices);
+    res.json(devices);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -107,7 +107,7 @@ const getPlaylists = async (_: Request, res: Response) => {
     const {
       body: {items},
     } = await spotify.getUserPlaylists();
-    res.send(items);
+    res.json(items);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -126,7 +126,7 @@ const getCurrentTrackInternal = async () => {
 const getCurrentTrack = async (_: Request, res: Response) => {
   try {
     const track = await getCurrentTrackInternal();
-    res.send(track);
+    res.json(track);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -158,7 +158,7 @@ const searchTracks = async ({params: {search}}: Request<{search: string}>, res: 
     const {
       body: {tracks},
     } = await spotify.searchTracks(search, {limit: 10});
-    res.send(tracks?.items ?? []);
+    res.json(tracks?.items ?? []);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -182,7 +182,7 @@ const getArtistTopTracks = async (
       body: {tracks},
     } = await spotify.getArtistTopTracks(artistId, country);
     const {body} = await spotify.getArtist(artistId);
-    res.send({tracks, artist: body});
+    res.json({tracks, artist: body});
   } catch (error) {
     res.status(500).send(error);
   }

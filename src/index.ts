@@ -15,7 +15,6 @@ import {
   getDevices,
   getPlaylists,
   authorize,
-  refreshToken,
   getCurrentTrack,
   playUri,
   playCurrentTrackRadio,
@@ -43,6 +42,7 @@ if (isProd) {
 }
 
 const allowedOrigins: string[] = JSON.parse(ALLOWED_ORIGINS);
+// app.set('etag', false); // Disable cache
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -73,7 +73,7 @@ app.get('/soca/count', (_req, res) => {
   if (0 === clientCount) {
     res.status(204).send();
   } else {
-    res.send(JSON.stringify(clientCount));
+    res.json(clientCount);
   }
 });
 
@@ -88,7 +88,6 @@ app.get('/spotify/playlist', getPlaylists);
 app.get('/spotify/playlist/add/:uri/:playlistId?', addTrackToPlaylist);
 app.get('/spotify/queue/:uri', addToQueue);
 app.get('/spotify/radio', playCurrentTrackRadio);
-app.get('/spotify/refresh-token', refreshToken);
 app.get('/spotify/track', getCurrentTrack);
 app.get('/spotify/search/:search', searchTracks);
 

@@ -49,7 +49,7 @@ const toggle = async (req: Request<{id: string}>, res: Response) => {
 
   bob.lights.setLightState(req.params.id, currentState.on ? new LightState().off() : new LightState().on(true));
 
-  res.send(!currentState.on);
+  res.json(!currentState.on);
 };
 
 const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
@@ -61,7 +61,7 @@ const setBrightness = (req: Request<{ratio: string}>, res: Response) => {
 const getLights = async (_: Request, res: Response) => {
   lights = await fetchLights();
 
-  res.send(lights);
+  res.json(lights);
 };
 
 (async () => {

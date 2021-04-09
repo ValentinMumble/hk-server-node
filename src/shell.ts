@@ -38,7 +38,7 @@ const getLogs = (_req: Request, res: Response) => {
     if (error) {
       throw error;
     } else {
-      res.send(JSON.stringify(logs));
+      res.json(logs);
     }
   });
 };
