@@ -8,7 +8,7 @@ const shell = {
     restart: 'sudo systemctl restart raspotify',
   },
   reboot: 'sudo reboot',
-  logs: 'tail --lines=100 /home/pi/.forever/hk-server-node.log',
+  logs: 'tail --lines=100 /home/pi/.pm2/logs/hk-server-node-out.log',
 };
 
 const execShell = (command: string, _?: Request, res?: Response) => {
