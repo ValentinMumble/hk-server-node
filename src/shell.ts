@@ -8,7 +8,7 @@ const shell = {
     restart: 'sudo systemctl restart raspotify',
   },
   reboot: 'sudo reboot',
-  logs: 'tail --lines=100 /home/pi/.pm2/logs/hk-server-node-out.log',
+  logs: 'tail --lines=100 /home/pi/.pm2/logs/hk-server-node.log',
 };
 
 const execShell = (command: string, _?: Request, res?: Response) => {
@@ -38,7 +38,15 @@ const getLogs = (_req: Request, res: Response) => {
     if (error) {
       throw error;
     } else {
-      res.json(logs);
+      const jsonLines: Object[] = [];
+
+      logs.split('\n').forEach(line => {
+        try {
+          jsonLines.push(JSON.parse(line));
+        } catch (error) {}
+      });
+
+      res.json(jsonLines);
     }
   });
 };
