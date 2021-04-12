@@ -68,7 +68,7 @@ const spotifyConnectWs = (ogSocket: Socket) => {
 
   const handleError = async (error: SpotifyError | Error | string) => {
     const message = getMessage(error);
-    console.error('Error message:', message);
+    console.error('Error:', message);
     if (message !== socket.lastSentError) {
       if ('The access token expired' === message) {
         try {
@@ -80,7 +80,7 @@ const spotifyConnectWs = (ogSocket: Socket) => {
         console.log('Restarting raspotify');
         restartRaspotify();
       } else if ('No active device' === message || 'Player command failed: No active device found' === message) {
-        console.log('Transfering playback', SPO_PI_ID);
+        console.log('Transfering playback to Pi');
         //@ts-ignore TODO update definitelyTyped def here
         spotify.transferMyPlayback([SPO_PI_ID], {play: false}).catch(handleError);
       } else {
@@ -99,7 +99,7 @@ const spotifyConnectWs = (ogSocket: Socket) => {
 
   socket.on('initiate', () => {
     if (!spotify.getAccessToken()) {
-      return emit(C.CONNECT_ERROR, 'An access token is required in order to start listening for playback events');
+      return emit(C.CONNECT_ERROR, 'Access token required');
     }
 
     //Useless?
@@ -137,14 +137,13 @@ const spotifyConnectWs = (ogSocket: Socket) => {
 
       // check if the track has been scrubbed
       const negativeProgress = playerState.progress_ms > socket.playerState.progress_ms + C.HAS_SCRUBBED_THRESHOLD;
-      const positiveProgess = playerState.progress_ms < socket.playerState.progress_ms - C.HAS_SCRUBBED_THRESHOLD;
-      if (negativeProgress || positiveProgess) {
+      const positiveProgress = playerState.progress_ms < socket.playerState.progress_ms - C.HAS_SCRUBBED_THRESHOLD;
+      if (negativeProgress || positiveProgress) {
         emit('seek', playerState.progress_ms, playerState.timestamp);
       }
       if (playerState.is_playing !== socket.playerState.is_playing) {
         // play state has changed
-        const event = playerState.is_playing ? 'playback_started' : 'playback_paused';
-        emit(event);
+        emit(playerState.is_playing ? 'playback_started' : 'playback_paused');
       }
       if (playerState.device.id !== socket.playerState.device.id) {
         // device has changed
