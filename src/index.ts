@@ -103,3 +103,7 @@ app.get('/logs', getLogs);
 
 app.get('/lyrics/:artist/:title', getTrackLyrics);
 app.get('/lyrics/current', getCurrentTrackLyrics);
+
+process.on('SIGINT', () => {
+  process.exit();
+});
