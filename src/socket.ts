@@ -49,7 +49,7 @@ const getMessage = (error: SpotifyError | Error | string) => {
   return error.message;
 };
 
-const spotifyConnectWs = (ogSocket: Socket) => {
+const spotifySocket = (ogSocket: Socket) => {
   let timeoutId: NodeJS.Timeout;
   let socket: SpotifySocket = Object.assign(ogSocket, {
     hasSentInitialState: false,
@@ -81,7 +81,6 @@ const spotifyConnectWs = (ogSocket: Socket) => {
         restartRaspotify();
       } else if ('No active device' === message || 'Player command failed: No active device found' === message) {
         console.log('Transfering playback to Pi');
-        //@ts-ignore TODO update definitelyTyped def here
         spotify.transferMyPlayback([SPO_PI_ID], {play: false}).catch(handleError);
       } else {
         emit(C.CONNECT_ERROR, message);
@@ -197,9 +196,8 @@ const spotifyConnectWs = (ogSocket: Socket) => {
   });
 
   socket.on('transfer_playback', ({id, play}: {id: string; play: boolean}) => {
-    //@ts-ignore TODO update definetelyTyped def here
     spotify.transferMyPlayback([id], {play}).catch(handleError);
   });
 };
 
-export default spotifyConnectWs;
+export {spotifySocket};

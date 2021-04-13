@@ -4,9 +4,8 @@ import https from 'https';
 import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import {Server} from 'socket.io';
-import connectSocket from './socket';
+import {spotifySocket} from './socket';
 import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
 import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot, getLogs} from './shell';
 import {
@@ -33,13 +32,10 @@ if (!ALLOWED_ORIGINS) {
 
 const isProd = 'prod' === APP_ENV;
 const app = express();
-let server;
 
-if (isProd) {
-  server = https.createServer({key: fs.readFileSync(HTTPS_KEY_FILE), cert: fs.readFileSync(HTTPS_CERT_FILE)}, app);
-} else {
-  server = http.createServer(app);
-}
+const server = isProd
+  ? https.createServer({key: fs.readFileSync(HTTPS_KEY_FILE), cert: fs.readFileSync(HTTPS_CERT_FILE)}, app)
+  : http.createServer(app);
 
 const allowedOrigins: string[] = JSON.parse(ALLOWED_ORIGINS);
 // app.set('etag', false); // Disable cache
@@ -53,22 +49,23 @@ app.use(
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
   })
 );
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
 
 server.listen(PORT);
 
-const io = new Server(server, {
+const hkNamespace = new Server(server, {
   cors: {
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true,
   },
-});
-io.of(WS_NAMESPACE).on('connection', connectSocket);
+}).of(WS_NAMESPACE);
+
+hkNamespace.on('connection', spotifySocket);
 
 app.get('/soca/count', (_req, res) => {
-  const clientCount = io.of(WS_NAMESPACE).sockets.size;
+  const clientCount = hkNamespace.sockets.size;
 
   if (0 === clientCount) {
     res.status(204).send();
