@@ -22,10 +22,11 @@
   },
   "scripts": {
     "build": "yarn tsc",
-    "daemon:start": "pm2 start",
-    "daemon:stop": "pm2 stop",
+    "start": "pm2 start $npm_package_name",
+    "stop": "pm2 stop $npm_package_name",
+    "restart": "yarn stop; yarn start",
     "upload": "export $(cat .env | grep PKG | xargs) && yarn build && rsync --copy-links -avz -e 'ssh' ./build .env $PKG_DEPLOY_HOST:$PKG_DEPLOY_PATH",
-    "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH ; yarn daemon:stop ; yarn daemon:start\""
+    "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH ; yarn restart\""
   },
   "devDependencies": {
     "@types/cors": "^2.8.10",
