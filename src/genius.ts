@@ -22,7 +22,7 @@ type LyricsSearch = {
 const getLyricsInternal = async (artist: string, title: string): Promise<LyricsSearch> => {
   const results = await searchSong({apiKey: GENIUS_TOKEN, artist: sanitize(artist), title: sanitize(title)});
 
-  if (null === results) {
+  if (null === results || 0 === Object.values(results).length) {
     throw new Error('No lyrics found');
   }
 
@@ -31,7 +31,7 @@ const getLyricsInternal = async (artist: string, title: string): Promise<LyricsS
   return {top, results};
 };
 
-const getCurrentTrackLyrics = async (_: Request, res: Response) => {
+const getCurrentTrackLyrics = async (_req: Request, res: Response) => {
   try {
     const track = await getCurrentTrackInternal();
     const results = await getLyricsInternal(track.artists[0].name, track.name);

@@ -81,6 +81,7 @@ const getLights = async (_req: Request, res: Response) => {
 };
 
 (async () => {
+  // Insecure because v1 does not support HTTPS
   bob = await v3.api.createInsecureLocal(ROBERT_HUE_IP).connect(ROBERT_HUE_USERNAME);
   lights = await fetchLights();
 })();
