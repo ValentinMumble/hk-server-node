@@ -26,7 +26,7 @@ const storePalette = ({body}: Request, res: Response) => {
 };
 
 const storeToken = (expiration: number, accessToken: string, refreshToken?: string) => {
-  console.log('Storing token', `${accessToken.substr(0, 20)}...`);
+  // console.log('Storing token', `${accessToken.substr(0, 20)}...`);
   spotify.setAccessToken(accessToken);
   if (refreshToken) spotify.setRefreshToken(refreshToken);
   expiresAt = Date.now() + expiration * 1000;

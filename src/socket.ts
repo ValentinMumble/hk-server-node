@@ -10,7 +10,6 @@ if (!SPO_PI_ID) {
 }
 
 const C = {
-  CONNECT_ERROR: 'spo_connect_error',
   HAS_SCRUBBED_THRESHOLD: 1500,
   HAS_FINISHED_THRESHOLD: 2000,
   POLL_RATE: 1000,
@@ -37,7 +36,7 @@ type SpotifyError = {
 
 const isSpotifyError = (error: any): error is SpotifyError => undefined !== error.body.error;
 
-const getMessage = (error: SpotifyError | Error | string) => {
+const getMessage = (error: SpotifyError | Error | string): string => {
   if ('string' === typeof error) {
     return error;
   }
@@ -61,34 +60,32 @@ const spotifySocket = (ogSocket: Socket) => {
   });
 
   const emit = (event: string, ...args: any) => {
-    // console.log('emit', event);
+    // console.info('emit', event);
 
     return socket.emit(event, ...args);
   };
 
   const handleError = async (error: SpotifyError | Error | string) => {
     const message = getMessage(error);
-    console.error('Error:', message);
-    if (message !== socket.lastSentError) {
-      if ('The access token expired' === message) {
-        try {
-          await refreshTokenInternal();
-        } catch (error) {
-          handleError(error);
-        }
-      } else if ('Device not found' === message) {
-        console.log('Restarting raspotify');
+    console.error(message);
+
+    switch (message) {
+      case 'The access token expired':
+        await refreshTokenInternal().catch(handleError);
+      case 'Device not found':
+        console.info('Restarting raspotify');
         restartRaspotify();
-      } else if ('No active device' === message || 'Player command failed: No active device found' === message) {
-        console.log('Transfering playback to Pi');
-        spotify.transferMyPlayback([SPO_PI_ID], {play: false}).catch(handleError);
-      } else {
-        emit(C.CONNECT_ERROR, message);
-      }
-      socket.lastSentError = message;
-    } else {
-      socket.pollRate = socket.pollRate < 5000 ? socket.pollRate + 1000 : 5000;
+      case 'No active device':
+      case 'Player command failed: No active device found':
+        console.info('Transfering playback to Pi');
+        await spotify.transferMyPlayback([SPO_PI_ID], {play: false}).catch(handleError);
     }
+    // if (message !== socket.lastSentError) {
+    //   emit(C.CONNECT_ERROR, message);
+    //   socket.lastSentError = message;
+    // } else {
+    //   socket.pollRate = socket.pollRate < 5000 ? socket.pollRate + 1000 : 5000;
+    // }
   };
 
   socket.on('disconnect', () => {
@@ -98,7 +95,7 @@ const spotifySocket = (ogSocket: Socket) => {
 
   socket.on('initiate', () => {
     if (!spotify.getAccessToken()) {
-      return emit(C.CONNECT_ERROR, 'Access token required');
+      return;
     }
 
     //Useless?
@@ -115,6 +112,7 @@ const spotifySocket = (ogSocket: Socket) => {
       if (!playerState || !playerState.device || !playerState.item || !playerState.progress_ms) {
         handleError('No active device');
         socket.hasSentInitialState = false;
+
         return;
       }
 
@@ -122,6 +120,7 @@ const spotifySocket = (ogSocket: Socket) => {
         emit('initial_state', playerState);
         socket.playerState = playerState;
         socket.hasSentInitialState = true;
+
         return;
       }
 
