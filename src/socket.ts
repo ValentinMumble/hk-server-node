@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import {refreshTokenInternal, spotify} from './spotify';
+import {refreshTokenInternal, spotify, SpotifyError, isSpotifyError} from './spotify';
 import {restartRaspotify} from './shell';
 import {Socket} from 'socket.io';
 
@@ -24,30 +24,6 @@ type SpotifySocket = Socket & {
   poll: () => void;
 };
 
-type SpotifyError = {
-  body: {
-    error: {
-      status: number;
-      message: string;
-      reason: string;
-    };
-  };
-};
-
-const isSpotifyError = (error: any): error is SpotifyError => undefined !== error.body.error;
-
-const getMessage = (error: SpotifyError | Error | string): string => {
-  if ('string' === typeof error) {
-    return error;
-  }
-
-  if (isSpotifyError(error)) {
-    return error.body.error.message;
-  }
-
-  return error.message;
-};
-
 const spotifySocket = (ogSocket: Socket) => {
   let timeoutId: NodeJS.Timeout;
   let socket: SpotifySocket = Object.assign(ogSocket, {
@@ -65,27 +41,24 @@ const spotifySocket = (ogSocket: Socket) => {
     return socket.emit(event, ...args);
   };
 
-  const handleError = async (error: SpotifyError | Error | string) => {
-    const message = getMessage(error);
+  const handleError = async (error: SpotifyError | Error) => {
+    const message = isSpotifyError(error) ? error.body.error.message : error.message;
     console.error(message);
 
     switch (message) {
       case 'The access token expired':
         await refreshTokenInternal().catch(handleError);
+        break;
       case 'Device not found':
         console.info('Restarting raspotify');
         restartRaspotify();
+        break;
       case 'No active device':
       case 'Player command failed: No active device found':
         console.info('Transfering playback to Pi');
         await spotify.transferMyPlayback([SPO_PI_ID], {play: false}).catch(handleError);
+        break;
     }
-    // if (message !== socket.lastSentError) {
-    //   emit(C.CONNECT_ERROR, message);
-    //   socket.lastSentError = message;
-    // } else {
-    //   socket.pollRate = socket.pollRate < 5000 ? socket.pollRate + 1000 : 5000;
-    // }
   };
 
   socket.on('disconnect', () => {
@@ -95,13 +68,12 @@ const spotifySocket = (ogSocket: Socket) => {
 
   socket.on('initiate', () => {
     if (!spotify.getAccessToken()) {
+      emit('no_token');
+
       return;
     }
 
-    //Useless?
-    socket.pollRate = C.POLL_RATE;
     socket.poll = poll;
-
     socket.poll();
   });
 
@@ -109,11 +81,8 @@ const spotifySocket = (ogSocket: Socket) => {
     try {
       const {body: playerState} = await spotify.getMyCurrentPlaybackState();
 
-      if (!playerState || !playerState.device || !playerState.item || !playerState.progress_ms) {
-        handleError('No active device');
-        socket.hasSentInitialState = false;
-
-        return;
+      if (!playerState || !playerState.device || !playerState.item || null === playerState.progress_ms) {
+        throw new Error('No active device');
       }
 
       if (!socket.hasSentInitialState) {

@@ -13,6 +13,18 @@ const SCOPES = [
   'playlist-read-private',
 ];
 
+type SpotifyError = {
+  body: {
+    error: {
+      status: number;
+      message: string;
+      reason: string;
+    };
+  };
+};
+
+const isSpotifyError = (error: any): error is SpotifyError => undefined !== error?.body?.error;
+
 const spotify = new SpotifyWebApi({
   clientId: SPO_CLIENT_ID,
   clientSecret: SPO_CLIENT_SECRET,
@@ -205,4 +217,6 @@ export {
   getArtistTopTracks,
   spotify,
   refreshTokenInternal,
+  isSpotifyError,
 };
+export type {SpotifyError};
