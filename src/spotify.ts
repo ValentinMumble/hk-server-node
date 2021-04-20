@@ -193,30 +193,42 @@ const getArtistTopTracks = async (
     const {
       body: {tracks},
     } = await spotify.getArtistTopTracks(artistId, country);
-    const {body} = await spotify.getArtist(artistId);
-    res.json({tracks, artist: body});
+    const {body: artist} = await spotify.getArtist(artistId);
+    res.json({tracks, artist});
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+const getAlbumTracks = async ({params: {albumId}}: Request<{albumId: string; country?: string}>, res: Response) => {
+  try {
+    const {
+      body: {items},
+    } = await spotify.getAlbumTracks(albumId);
+    res.json(items);
   } catch (error) {
     res.status(500).send(error);
   }
 };
 
 export {
+  addToQueue,
   addTrackToPlaylist,
   authorize,
   getAccessToken,
+  getAlbumTracks,
+  getArtistTopTracks,
   getCurrentTrack,
   getCurrentTrackInternal,
   getDevices,
   getPlaylists,
-  refreshToken,
+  isSpotifyError,
   playCurrentTrackRadio,
   playUri,
-  searchTracks,
-  storePalette,
-  addToQueue,
-  getArtistTopTracks,
-  spotify,
+  refreshToken,
   refreshTokenInternal,
-  isSpotifyError,
+  searchTracks,
+  spotify,
+  storePalette,
 };
 export type {SpotifyError};

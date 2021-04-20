@@ -9,18 +9,19 @@ import {spotifySocket} from './socket';
 import {turnOn, turnOff, setBrightness, toggle, getLights} from './hue';
 import {discoverBluetooth, resetBluetooth, restartRaspotify, reboot, getLogs} from './shell';
 import {
+  addToQueue,
   addTrackToPlaylist,
+  authorize,
   getAccessToken,
+  getAlbumTracks,
+  getArtistTopTracks,
+  getCurrentTrack,
   getDevices,
   getPlaylists,
-  authorize,
-  getCurrentTrack,
-  playUri,
   playCurrentTrackRadio,
+  playUri,
   searchTracks,
   storePalette,
-  addToQueue,
-  getArtistTopTracks,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
 
@@ -77,6 +78,7 @@ app.get('/soca/count', (_req, res) => {
 app.post('/palette', storePalette);
 
 app.get('/spotify/access-token', getAccessToken);
+app.get('/spotify/album/:albumId', getAlbumTracks);
 app.get('/spotify/artist/:artistId/top/:country?', getArtistTopTracks);
 app.get('/spotify/authorize/:code', authorize);
 app.get('/spotify/device', getDevices);
@@ -85,8 +87,8 @@ app.get('/spotify/playlist', getPlaylists);
 app.get('/spotify/playlist/add/:uri/:playlistId?', addTrackToPlaylist);
 app.get('/spotify/queue/:uri', addToQueue);
 app.get('/spotify/radio', playCurrentTrackRadio);
-app.get('/spotify/track', getCurrentTrack);
 app.get('/spotify/search/:search', searchTracks);
+app.get('/spotify/track', getCurrentTrack);
 
 app.get('/hue/on/:color', turnOn);
 app.get('/hue/off/:id?', turnOff);
