@@ -21,6 +21,8 @@ import {
   playCurrentTrackRadio,
   playUri,
   searchTracks,
+  setRepeat,
+  setShuffle,
   storePalette,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
@@ -88,6 +90,8 @@ app.get('/spotify/playlist/add/:uri/:playlistId?', addTrackToPlaylist);
 app.get('/spotify/queue/:uri', addToQueue);
 app.get('/spotify/radio', playCurrentTrackRadio);
 app.get('/spotify/search/:search', searchTracks);
+app.get('/spotify/shuffle/:isShuffle', setShuffle);
+app.get('/spotify/repeat/:repeatState', setRepeat);
 app.get('/spotify/track', getCurrentTrack);
 
 app.get('/hue/on/:color', turnOn);

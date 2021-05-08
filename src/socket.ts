@@ -20,7 +20,7 @@ type SpotifySocket = Socket & {
   hasNotifiedTrackEnd: boolean;
   lastSentError: string;
   pollRate: number;
-  playerState: any;
+  playerState?: SpotifyApi.CurrentPlaybackResponse;
   poll: () => void;
 };
 
@@ -35,7 +35,9 @@ const spotifySocket = (ogSocket: Socket) => {
     poll: () => {},
   });
 
-  const emit = (event: string, ...args: any) => {
+  type Payload = string | number | boolean | object;
+
+  const emit = (event: string, ...args: Payload[]) => {
     // console.info('emit', event);
 
     return socket.emit(event, ...args);
@@ -85,7 +87,7 @@ const spotifySocket = (ogSocket: Socket) => {
         throw new Error('No active device');
       }
 
-      if (!socket.hasSentInitialState) {
+      if (!socket.hasSentInitialState || !socket.playerState) {
         emit('initial_state', playerState);
         socket.playerState = playerState;
         socket.hasSentInitialState = true;
@@ -96,21 +98,27 @@ const spotifySocket = (ogSocket: Socket) => {
       // reset poll rate if no errors were encountered
       socket.pollRate = C.POLL_RATE;
 
-      if (playerState.item.id !== socket.playerState.item.id) {
+      if (playerState.item.id !== socket.playerState?.item?.id) {
         // track has changed
         emit('track_change', playerState.item);
         socket.hasNotifiedTrackEnd = false;
       }
 
-      // check if the track has been scrubbed
-      const negativeProgress = playerState.progress_ms > socket.playerState.progress_ms + C.HAS_SCRUBBED_THRESHOLD;
-      const positiveProgress = playerState.progress_ms < socket.playerState.progress_ms - C.HAS_SCRUBBED_THRESHOLD;
-      if (negativeProgress || positiveProgress) {
-        emit('seek', playerState.progress_ms, playerState.timestamp);
+      if (socket.playerState.progress_ms) {
+        // check if the track has been scrubbed
+        const negativeProgress = playerState.progress_ms > socket.playerState.progress_ms + C.HAS_SCRUBBED_THRESHOLD;
+        const positiveProgress = playerState.progress_ms < socket.playerState.progress_ms - C.HAS_SCRUBBED_THRESHOLD;
+        if (negativeProgress || positiveProgress) {
+          emit('seek', playerState.progress_ms, playerState.timestamp);
+        }
       }
       if (playerState.is_playing !== socket.playerState.is_playing) {
         // play state has changed
         emit(playerState.is_playing ? 'playback_started' : 'playback_paused');
+      }
+      if (playerState.shuffle_state !== socket.playerState.shuffle_state) {
+        // shuffle state has changed
+        emit('shuffle_state', playerState.shuffle_state);
       }
       if (playerState.device.id !== socket.playerState.device.id) {
         // device has changed
@@ -119,7 +127,7 @@ const spotifySocket = (ogSocket: Socket) => {
         // device is the same, check volume
         if (playerState.device.volume_percent !== socket.playerState.device.volume_percent) {
           // volume has changed
-          emit('volume_change', playerState.device.volume_percent);
+          emit('volume_change', Number(playerState.device.volume_percent));
         }
       }
 

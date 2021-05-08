@@ -125,7 +125,7 @@ const getPlaylists = async (_: Request, res: Response) => {
   }
 };
 
-const getCurrentTrackInternal = async () => {
+const getCurrentTrackInternal = async (): Promise<SpotifyApi.TrackObjectFull> => {
   const {body} = await spotify.getMyCurrentPlayingTrack();
 
   if (null === body.item) {
@@ -144,20 +144,38 @@ const getCurrentTrack = async (_: Request, res: Response) => {
   }
 };
 
-const playUri = async ({params: {uri}}: Request<{uri: string}>, res: Response) => {
+const playUri = async (
+  {params: {uri}, query: {withRadio = false}}: Request<{uri: string}, null, null, {withRadio: boolean}>,
+  res: Response
+) => {
   try {
-    spotify.play({uris: [uri]});
+    const uris = [uri];
+
+    if (withRadio) {
+      const [, , id] = uri.split(':');
+      const recommendations = await getTrackRecommendationsUris(id);
+      uris.push(...recommendations);
+    }
+
+    await spotify.play({uris});
     res.status(204).send();
   } catch (error) {
     res.status(500).send(error);
   }
 };
 
+const getTrackRecommendationsUris = async (trackId: string): Promise<string[]> => {
+  const {
+    body: {tracks},
+  } = await spotify.getRecommendations({seed_tracks: [trackId], limit: 50});
+
+  return tracks.map(({uri}) => uri);
+};
+
 const playCurrentTrackRadio = async (_: Request, res: Response) => {
   try {
-    const track = await getCurrentTrackInternal();
-    const recommandations = await spotify.getRecommendations({seed_tracks: [track.id], limit: 50});
-    const uris = recommandations.body.tracks.map(track => track.uri);
+    const {id} = await getCurrentTrackInternal();
+    const uris = await getTrackRecommendationsUris(id);
     spotify.play({uris});
     res.status(204).send();
   } catch (error) {
@@ -211,6 +229,26 @@ const getAlbumTracks = async ({params: {albumId}}: Request<{albumId: string; cou
   }
 };
 
+const setShuffle = async ({params: {isShuffle}}: Request<{isShuffle: boolean}>, res: Response) => {
+  try {
+    await spotify.setShuffle(isShuffle);
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+type RepeatState = 'off' | 'track' | 'context'
+
+const setRepeat = async ({params: {repeatState}}: Request<{repeatState: RepeatState}>, res: Response) => {
+  try {
+    await spotify.setRepeat(repeatState);
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 export {
   addToQueue,
   addTrackToPlaylist,
@@ -228,6 +266,8 @@ export {
   refreshToken,
   refreshTokenInternal,
   searchTracks,
+  setRepeat,
+  setShuffle,
   spotify,
   storePalette,
 };
