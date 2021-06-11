@@ -120,6 +120,10 @@ const spotifySocket = (ogSocket: Socket) => {
         // shuffle state has changed
         emit('shuffle_state', playerState.shuffle_state);
       }
+      if (playerState.repeat_state !== socket.playerState.repeat_state) {
+        // repeat state has changed
+        emit('repeat_state', playerState.repeat_state);
+      }
       if (playerState.device.id !== socket.playerState.device.id) {
         // device has changed
         emit('device_change', playerState.device);
