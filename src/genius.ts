@@ -37,7 +37,7 @@ const getCurrentTrackLyrics = async (_req: Request, res: Response) => {
     const results = await getLyricsInternal(track.artists[0].name, track.name);
     res.json(results);
   } catch (error) {
-    res.status(500).json(error.message);
+    if (error instanceof Error) res.status(500).json(error.message);
   }
 };
 
@@ -46,7 +46,7 @@ const getTrackLyrics = async ({params: {artist, title}}: Request<{title: string;
     const results = await getLyricsInternal(artist, title);
     res.json(results);
   } catch (error) {
-    res.status(500).json(error.message);
+    if (error instanceof Error) res.status(500).json(error.message);
   }
 };
 

@@ -2,11 +2,12 @@ import 'dotenv/config';
 import {refreshTokenInternal, spotify, SpotifyError, isSpotifyError} from './spotify';
 import {restartRaspotify} from './shell';
 import {Socket} from 'socket.io';
+import {discover} from 'chromecast';
 
-const {SPO_PI_ID} = process.env;
+const {SPO_MUMBLECAST_ID} = process.env;
 
-if (!SPO_PI_ID) {
-  throw new Error('Missing PI id in .env');
+if (!SPO_MUMBLECAST_ID) {
+  throw new Error('Missing Mumblecast id in .env');
 }
 
 const C = {
@@ -57,8 +58,8 @@ const spotifySocket = (ogSocket: Socket) => {
         break;
       case 'No active device':
       case 'Player command failed: No active device found':
-        console.info('Transfering playback to Pi');
-        await spotify.transferMyPlayback([SPO_PI_ID], {play: false}).catch(handleError);
+        console.info('Transfering playback to Mumblecast');
+        await spotify.transferMyPlayback([SPO_MUMBLECAST_ID], {play: false}).catch(handleError);
         break;
     }
   };
@@ -145,7 +146,7 @@ const spotifySocket = (ogSocket: Socket) => {
 
       socket.playerState = playerState;
     } catch (error) {
-      handleError(error);
+      if (error instanceof Error) handleError(error);
     } finally {
       timeoutId = setTimeout(socket.poll, socket.pollRate);
     }
@@ -176,6 +177,7 @@ const spotifySocket = (ogSocket: Socket) => {
   });
 
   socket.on('transfer_playback', ({id, play}: {id: string; play: boolean}) => {
+    discover();
     spotify.transferMyPlayback([id], {play}).catch(handleError);
   });
 };

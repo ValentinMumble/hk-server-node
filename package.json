@@ -10,14 +10,15 @@
   "author": "Valentin Dijkstra",
   "license": "MIT",
   "dependencies": {
+    "chromecast-api": "^0.3.4",
     "cors": "^2.8.5",
-    "dotenv": "^8.0.0",
+    "dotenv": "^10.0.0",
     "express": "^4.16.1",
-    "genius-lyrics-api": "^3.0.6",
-    "node-hue-api": "^5.0.0-beta.2",
-    "socket.io": "^4.0.1",
+    "genius-lyrics-api": "^3.2.0",
+    "node-hue-api": "^5.0.0-beta.8",
+    "socket.io": "^4.2.0",
     "spotify-web-api-node": "^5.0.2",
-    "typescript": "^4.2.4"
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "yarn tsc",
@@ -28,10 +29,10 @@
     "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH ; yarn restart\""
   },
   "devDependencies": {
-    "@types/cors": "^2.8.10",
-    "@types/express": "^4.17.11",
-    "@types/node": "^14.14.37",
-    "@types/node-hue-api": "^2.3.0",
-    "@types/spotify-web-api-node": "^5.0.2"
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.10.2",
+    "@types/node-hue-api": "^2.3.2",
+    "@types/spotify-web-api-node": "^5.0.3"
   }
 }
