@@ -238,7 +238,7 @@ const setShuffle = async ({params: {isShuffle}}: Request<{isShuffle: boolean}>, 
   }
 };
 
-type RepeatState = 'off' | 'track' | 'context'
+type RepeatState = 'off' | 'track' | 'context';
 
 const setRepeat = async ({params: {repeatState}}: Request<{repeatState: RepeatState}>, res: Response) => {
   try {

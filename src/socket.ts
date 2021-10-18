@@ -1,13 +1,12 @@
 import 'dotenv/config';
+import {Socket} from 'socket.io';
 import {refreshTokenInternal, spotify, SpotifyError, isSpotifyError} from './spotify';
 import {restartRaspotify} from './shell';
-import {Socket} from 'socket.io';
-import {discover} from 'chromecast';
 
-const {SPO_MUMBLECAST_ID} = process.env;
+const {SPO_DEFAULT_ID} = process.env;
 
-if (!SPO_MUMBLECAST_ID) {
-  throw new Error('Missing Mumblecast id in .env');
+if (!SPO_DEFAULT_ID) {
+  throw new Error('Missing default device id in .env');
 }
 
 const C = {
@@ -58,8 +57,12 @@ const spotifySocket = (ogSocket: Socket) => {
         break;
       case 'No active device':
       case 'Player command failed: No active device found':
-        console.info('Transfering playback to Mumblecast');
-        await spotify.transferMyPlayback([SPO_MUMBLECAST_ID], {play: false}).catch(handleError);
+        const defaultDevice = process.env[SPO_DEFAULT_ID];
+
+        if (!defaultDevice) break;
+
+        console.info('Transfering playback to', defaultDevice);
+        await spotify.transferMyPlayback([defaultDevice], {play: false}).catch(handleError);
         break;
     }
   };
@@ -177,7 +180,6 @@ const spotifySocket = (ogSocket: Socket) => {
   });
 
   socket.on('transfer_playback', ({id, play}: {id: string; play: boolean}) => {
-    discover();
     spotify.transferMyPlayback([id], {play}).catch(handleError);
   });
 };
