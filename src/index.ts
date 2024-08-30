@@ -26,7 +26,7 @@ import {
   storePalette,
 } from './spotify';
 import {getTrackLyrics, getCurrentTrackLyrics} from './genius';
-import {getEvents} from './statva';
+import {getEvents, postEvent} from './statva';
 
 const {ALLOWED_ORIGINS, APP_ENV, HTTPS_CERT_FILE = '', HTTPS_KEY_FILE = '', PORT, WS_NAMESPACE = ''} = process.env;
 
@@ -112,6 +112,7 @@ app.get('/lyrics/:artist/:title', getTrackLyrics);
 app.get('/lyrics/current', getCurrentTrackLyrics);
 
 app.get('/statva/events', getEvents);
+app.post('/statva/events', postEvent);
 
 process.on('SIGINT', () => {
   process.exit();
