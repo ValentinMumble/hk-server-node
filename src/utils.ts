@@ -33,4 +33,16 @@ const hex2XY = (hex: string): number[] => RGB2XY(hex2RGB(hex));
 
 const sanitize = (string: string) => string.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-export {hex2RGB, sanitize, RGB2XY, hex2XY};
+const uuid = (): string => {
+  let date = new Date().getTime();
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char: string) => {
+    const random = (date + Math.random() * 16) % 16 | 0;
+    date = Math.floor(date / 16);
+
+    return ('x' === char ? random : (random & 0x3) | 0x8).toString(16);
+  });
+
+  return uuid;
+};
+
+export {hex2RGB, sanitize, RGB2XY, hex2XY, uuid};
