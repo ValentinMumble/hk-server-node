@@ -24,9 +24,9 @@
     "build": "yarn tsc",
     "start": "pm2 start ecosystem.config.js",
     "stop": "pm2 stop $npm_package_name",
-    "restart": "yarn stop; yarn start",
+    "restart": "npm run stop; npm run start",
     "upload": "export $(cat .env | grep PKG | xargs) && yarn build && rsync --copy-links -avz -e 'ssh' ./build .env $PKG_DEPLOY_HOST:$PKG_DEPLOY_PATH",
-    "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH ; yarn restart\""
+    "deploy": "export $(cat .env | grep PKG | xargs) && yarn upload && ssh $PKG_DEPLOY_HOST \"cd $PKG_DEPLOY_PATH ; npm run restart\""
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
